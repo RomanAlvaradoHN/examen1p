@@ -1,90 +1,106 @@
 import socket
 import threading
 import os
-import mysql.connector
+import mariadb
 
 class Server:
-    
-    #Constructor de la clase ========================================
-    def __init__(self, host, port, consultas, utilities):
-        os.system('clear')
-        self.host = host
-        self.port = port
-        self.consultas = consultas
-        self.utils = utilities
-        self.clients = []
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((self.host, self.port))
 
-    
-    #Inicializador del script ========================================
-    def start(self):
-        self.server_socket.listen(5)
-        print("Servidor escuchando en {}:{}".format(self.host, self.port))
+
+    def __init__(self, parametros):
+        os.system('clear')
+        self.host  = parametros["server_ip"]
+        self.port  = parametros["server_port"]
+        self.db    = parametros["database_conexion"]
+        self.utils = parametros["utilities"]
+
+        #Inicio de socket ===========================================
+        try:
+            self.clients = []
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.bind((self.host, self.port))
+            self.server_socket.listen(5)
+            print("Servidor escuchando en {}:{}".format(self.host, self.port))
+
+        except BaseException as errorType:
+            self.utils.error_handler(errorType)
         
+
+        #Escucha de mensajes ========================================
         try:
             while True:
-                client_socket, client_address = self.server_socket.accept()
-                client_name = client_socket.recv(1024).decode("utf-8")
+                self.__socketActivityHandler
 
 
-                print("\n\nNueva conexión de {}:{}".format(client_address[0], client_address[1]))
-                print("Participante: {}".format(client_name))
-                print("====================")
-
-                #Añadimos el nuevo participante a la lista
-                self.clients.append({"name": client_name, "socket": client_socket})
-
-
-                client_thread = threading.Thread(target = self.handle_client, args=(client_socket,))
-                client_thread.start()
-
-
-        except BaseException as errorType: 
+        except BaseException as errorType:
             self.utils.error_handler(errorType)
 
 
+
+
+
+    def __socketActivityHandler(self):
+        client_socket, client_address = self.server_socket.accept()
+        message = client_socket.recv(1024).decode("utf-8")
+
+        if message.startswith("credenciales"):
+            pass
+        
+        elif message.startswith("chat"):
+            self.__handle_client(message)
+
+
+
     #Obtener datos  del mensaje y determinar qué metodo procesa la salida del mensaje: ==========================
-    def handle_client(self, client_socket):
+    def __handle_client(self, client_socket):
+        
+        #Añadimos el nuevo participante a la lista
+        self.clients.append({"name": client_name, "socket": client_socket})
+        print("\n\nNueva conexión de {}:{}".format(client_address[0], client_address[1]))
+        print("Participante: {}".format(client_name))
+        print("====================")
+        client_thread = threading.Thread(target = self.__handle_client, args=(client_socket,))
+        client_thread.start()
+        
         try:
             #encuentra quien envia el msj===================
             for client in self.clients:
                 if client["socket"] == client_socket:
-                    sender_name = client["name"] + ": " 
+                    sender_name = client["name"] + ": "
                     break
 
 
             while True:
                 data = client_socket.recv(1024)
-
-
                 if not data:
                     break
 
                 message = data.decode("utf-8")
+                print(message)
 
-                #MANEJO DE TRAMAS, MENSAJERIA Y COMUNICACION ==============================================
-                if message.startswith("1"): #Validar credenciales
-                    self.consultas.validarCredenciales(message)
-                
-                elif message.startswith("@"):
+
+                if message.startswith("@"):
                     recipient, message = message.split(":", 1)
                     recipient = recipient[1:]
 
                     if recipient == "server": #consola del servidor
                         self.send_message_to_server(sender_name, message)
-                    
+
                     else: #consola de participante específico
                         self.send_message_to_client(recipient, (sender_name + message))
-                
+
                 else: #consola de todos los participantes
                     self.broadcast((sender_name + message), client_socket)
 
+            
+            
             client_socket.close()
-            self.clients.remove(client_socket)
+
+            if client_socket in self.clients:
+                self.clients.remove(client_socket)
 
         except BaseException as error:
             self.utils.error_handler(error)
+            self.server_socket.close()
 
 
 
@@ -92,13 +108,14 @@ class Server:
     def send_message_to_server(self, sender_name, message):
         print(sender_name, message)
 
-            
-    
+
+
     def send_message_to_client(self, recipient, message):
         for client in self.clients:
             if client["name"] == recipient:
                 client["socket"].send(message.encode("utf-8"))
                 break
+
 
 
     def broadcast(self, message, sender_socket):
@@ -109,25 +126,27 @@ class Server:
 
 
 
+    
 
 
 
 
 
-class Consultas():
+class DataBase_Conexion():
 
     def __init__(self):
         try:
-            self.conexion = mysql.connector.connect(
-                host="localhost",
+            self.conexion = mariadb.connect(
                 user="admin",
                 password="grupo1",
+                host="localhost",
+                port=3306,
                 database="sa1bd"
             )
 
         except BaseException as error:
             print(error)
-        
+
 
     def validarCredenciales(self, trama):
         subTramas = trama.split("-", 2)
@@ -157,18 +176,21 @@ class Utilities():
 
     #Manejador de errores de socket =======================================
     def error_handler(self, errorType):
+        msj = None
 
         if(type(errorType) is KeyboardInterrupt):
             msj = "Script terminado por teclado"
-            print(msj)
-
 
         elif(type(errorType) is ValueError):
             msj = "Usuario abandonó"
-            print(msj)
 
-        print("Error", errorType)
-        self.server_socket.close()
+        elif(type(errorType) is OSError):
+            msj = "Direccion en uso. Utilize: ss -ltpn | grep [server_port]"
+        
+        else: print("Nuevo Error:", errorType)
+
+        self.limpiarConsola()
+        print(msj + "\n\n")
         exit()
 
 
@@ -187,7 +209,12 @@ class Utilities():
 
 #Bloque de entrada e inicio del script =========================================
 if __name__ == "__main__":
-    consultas = Consultas()
-    utilities = Utilities()
-    server = Server('172.31.42.187', 9999, consultas, utilities)
-    server.start()
+
+    parametros = {
+        "server_ip": '172.31.30.203',
+        "server_port": 9999,
+        "database_conexion": DataBase_Conexion(),
+        "utilities": Utilities()
+    }
+
+    server = Server(parametros)
