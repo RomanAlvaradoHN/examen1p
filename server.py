@@ -7,7 +7,6 @@ class Server:
 
 
     def __init__(self, parametros):
-        os.system('clear')
         self.host  = parametros["server_ip"]
         self.port  = parametros["server_port"]
         self.db    = parametros["database_conexion"]
@@ -15,6 +14,7 @@ class Server:
 
         #Inicio de socket ===========================================
         try:
+            self.utils.limpiarConsola
             self.clients = []
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.host, self.port))
