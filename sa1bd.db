@@ -1,0 +1,309 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 14-02-2024 a las 04:31:06
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.0.28
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `sa1bd`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cliente`
+--
+
+CREATE TABLE `cliente` (
+  `Id` int(11) NOT NULL,
+  `Nombre` varchar(50) NOT NULL,
+  `Estado` int(11) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cuotaestado`
+--
+
+CREATE TABLE `cuotaestado` (
+  `Id` int(11) NOT NULL,
+  `descripcion` varchar(9) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `cuotaestado`
+--
+
+INSERT INTO `cuotaestado` (`Id`, `descripcion`) VALUES
+(1, 'aplicado'),
+(2, 'pendiente');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cuotas`
+--
+
+CREATE TABLE `cuotas` (
+  `Id` int(11) NOT NULL,
+  `IdCliente` int(11) NOT NULL,
+  `IdPrestamo` int(11) NOT NULL,
+  `Cuota` int(11) NOT NULL,
+  `Fecha` date NOT NULL,
+  `MontoCuota` double NOT NULL,
+  `Estado` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estadocliente`
+--
+
+CREATE TABLE `estadocliente` (
+  `Id` int(11) NOT NULL,
+  `descripcion` varchar(8) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `estadocliente`
+--
+
+INSERT INTO `estadocliente` (`Id`, `descripcion`) VALUES
+(1, 'activo'),
+(2, 'inactivo');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estadoprestamo`
+--
+
+CREATE TABLE `estadoprestamo` (
+  `Id` int(11) NOT NULL,
+  `Descripcion` varchar(9) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `estadoprestamo`
+--
+
+INSERT INTO `estadoprestamo` (`Id`, `Descripcion`) VALUES
+(1, 'activo'),
+(2, 'cancelado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `prestamo`
+--
+
+CREATE TABLE `prestamo` (
+  `id` int(11) NOT NULL,
+  `IdCliente` int(11) NOT NULL,
+  `MontoPrestamo` int(11) NOT NULL,
+  `cuotas` int(11) NOT NULL DEFAULT 6,
+  `montocuota` double NOT NULL,
+  `saldoPendiente` double NOT NULL,
+  `Estado` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reversion`
+--
+
+CREATE TABLE `reversion` (
+  `Id` int(11) NOT NULL,
+  `Fecha` date NOT NULL,
+  `Idprestamo` int(11) NOT NULL,
+  `IdCuota` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuairo`
+--
+
+CREATE TABLE `usuairo` (
+  `Id` int(11) NOT NULL,
+  `Nombre` varchar(50) NOT NULL,
+  `codUsuario` varchar(20) NOT NULL,
+  `clave` varchar(12) NOT NULL,
+  `idCliente` int(11) NOT NULL,
+  `Estado` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `cliente`
+--
+ALTER TABLE `cliente`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `Estado` (`Estado`);
+
+--
+-- Indices de la tabla `cuotaestado`
+--
+ALTER TABLE `cuotaestado`
+  ADD PRIMARY KEY (`Id`);
+
+--
+-- Indices de la tabla `cuotas`
+--
+ALTER TABLE `cuotas`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `IdCliente` (`IdCliente`,`IdPrestamo`,`Estado`),
+  ADD KEY `Estado` (`Estado`),
+  ADD KEY `IdPrestamo` (`IdPrestamo`);
+
+--
+-- Indices de la tabla `estadocliente`
+--
+ALTER TABLE `estadocliente`
+  ADD PRIMARY KEY (`Id`);
+
+--
+-- Indices de la tabla `estadoprestamo`
+--
+ALTER TABLE `estadoprestamo`
+  ADD PRIMARY KEY (`Id`);
+
+--
+-- Indices de la tabla `prestamo`
+--
+ALTER TABLE `prestamo`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `Estado` (`Estado`),
+  ADD UNIQUE KEY `IdCliente` (`IdCliente`);
+
+--
+-- Indices de la tabla `reversion`
+--
+ALTER TABLE `reversion`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `Idprestamo` (`Idprestamo`,`IdCuota`),
+  ADD KEY `IdCuota` (`IdCuota`);
+
+--
+-- Indices de la tabla `usuairo`
+--
+ALTER TABLE `usuairo`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `Estado` (`Estado`),
+  ADD UNIQUE KEY `idCliente` (`idCliente`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `cliente`
+--
+ALTER TABLE `cliente`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `cuotaestado`
+--
+ALTER TABLE `cuotaestado`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `cuotas`
+--
+ALTER TABLE `cuotas`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `estadocliente`
+--
+ALTER TABLE `estadocliente`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `estadoprestamo`
+--
+ALTER TABLE `estadoprestamo`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `prestamo`
+--
+ALTER TABLE `prestamo`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `reversion`
+--
+ALTER TABLE `reversion`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `usuairo`
+--
+ALTER TABLE `usuairo`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `cliente`
+--
+ALTER TABLE `cliente`
+  ADD CONSTRAINT `cliente_ibfk_1` FOREIGN KEY (`Estado`) REFERENCES `estadocliente` (`Id`);
+
+--
+-- Filtros para la tabla `cuotas`
+--
+ALTER TABLE `cuotas`
+  ADD CONSTRAINT `cuotas_ibfk_1` FOREIGN KEY (`IdCliente`) REFERENCES `cliente` (`Id`),
+  ADD CONSTRAINT `cuotas_ibfk_3` FOREIGN KEY (`Estado`) REFERENCES `cuotaestado` (`Id`),
+  ADD CONSTRAINT `cuotas_ibfk_4` FOREIGN KEY (`IdPrestamo`) REFERENCES `prestamo` (`id`);
+
+--
+-- Filtros para la tabla `prestamo`
+--
+ALTER TABLE `prestamo`
+  ADD CONSTRAINT `prestamo_ibfk_2` FOREIGN KEY (`IdCliente`) REFERENCES `cliente` (`Id`),
+  ADD CONSTRAINT `prestamo_ibfk_3` FOREIGN KEY (`Estado`) REFERENCES `estadoprestamo` (`Id`);
+
+--
+-- Filtros para la tabla `reversion`
+--
+ALTER TABLE `reversion`
+  ADD CONSTRAINT `reversion_ibfk_1` FOREIGN KEY (`Idprestamo`) REFERENCES `prestamo` (`id`),
+  ADD CONSTRAINT `reversion_ibfk_2` FOREIGN KEY (`IdCuota`) REFERENCES `cuotas` (`Id`);
+
+--
+-- Filtros para la tabla `usuairo`
+--
+ALTER TABLE `usuairo`
+  ADD CONSTRAINT `usuairo_ibfk_1` FOREIGN KEY (`Estado`) REFERENCES `estadocliente` (`Id`),
+  ADD CONSTRAINT `usuairo_ibfk_2` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`Id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
