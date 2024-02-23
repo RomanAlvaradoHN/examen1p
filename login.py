@@ -9,9 +9,9 @@ class Ventana():
 
     #Constructor de clase (ventana login )================================
     def __init__(self, parametros):
-        self.sokt = parametros["clientsocket"]
-        self.utils        = parametros["utils"]
-        root              = tk.Tk()
+        self.sokt   = parametros["clientsocket"]
+        self.utils  = parametros["utils"]
+        root        = tk.Tk()
         
         root.title("Login")
         colorFondo = "white"
