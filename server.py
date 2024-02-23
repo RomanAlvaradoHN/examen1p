@@ -19,17 +19,28 @@ class Server:
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
-            print("Servidor escuchando en {}:{}".format(self.host, self.port))
+
+            print("===============================================================")
+            print(f"\n    Servidor escuchando en {self.host}:{self.port}        \n")
+            print("===============================================================")
+
 
 
         except BaseException as errorType:
             self.utils.error_handler(errorType)
-        
+
 
         #Escucha de mensajes ========================================
         try:
             while True:
-                self.__socketActivityHandler
+                client_socket, client_address = self.server_socket.accept()
+                message = client_socket.recv(1024).decode("utf-8")
+
+                if message.startswith("credenciales"):
+            	    pass
+
+                elif message.startswith("chat"):
+                    pass
 
 
         except BaseException as errorType:
@@ -39,21 +50,12 @@ class Server:
 
 
 
-    def __socketActivityHandler(self):
-        client_socket, client_address = self.server_socket.accept()
-        message = client_socket.recv(1024).decode("utf-8")
-
-        if message.startswith("credenciales"):
-            pass
-        
-        elif message.startswith("chat"):
-            self.__handle_client(message)
 
 
 
     #Obtener datos  del mensaje y determinar qué metodo procesa la salida del mensaje: ==========================
     def __handle_client(self, client_socket):
-        
+
         #Añadimos el nuevo participante a la lista
         self.clients.append({"name": client_name, "socket": client_socket})
         print("\n\nNueva conexión de {}:{}".format(client_address[0], client_address[1]))
@@ -61,7 +63,7 @@ class Server:
         print("====================")
         client_thread = threading.Thread(target = self.__handle_client, args=(client_socket,))
         client_thread.start()
-        
+
         try:
             #encuentra quien envia el msj===================
             for client in self.clients:
@@ -92,8 +94,8 @@ class Server:
                 else: #consola de todos los participantes
                     self.broadcast((sender_name + message), client_socket)
 
-            
-            
+
+
             client_socket.close()
 
             if client_socket in self.clients:
@@ -127,7 +129,7 @@ class Server:
 
 
 
-    
+
 
 
 
@@ -187,7 +189,7 @@ class Utilities():
 
         elif(type(errorType) is OSError):
             msj = "Direccion en uso. Utilize: ss -ltpn | grep [server_port]"
-        
+
         else: print("Nuevo Error:", errorType)
 
         self.limpiarConsola()
