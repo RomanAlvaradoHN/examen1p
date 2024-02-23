@@ -14,12 +14,13 @@ class Server:
 
         #Inicio de socket ===========================================
         try:
-            self.utils.limpiarConsola
+            self.utils.limpiarConsola()
             self.clients = []
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
             print("Servidor escuchando en {}:{}".format(self.host, self.port))
+
 
         except BaseException as errorType:
             self.utils.error_handler(errorType)
@@ -200,9 +201,8 @@ class Utilities():
     def limpiarConsola(self):
         if os.name == 'nt':  # Windows
             os.system('cls')
-        else:  # Linux, Unix, macOS
+        else:  # Linux, Unix, macOS, POSIX
             os.system('clear')
-
 
 
 
