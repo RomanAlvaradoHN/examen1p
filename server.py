@@ -2,6 +2,7 @@ import socket
 import threading
 import os
 import mariadb
+import json
 
 class SocketServer:
 
@@ -33,11 +34,12 @@ class SocketServer:
                 client_socket, client_address = self.server_socket.accept()
                 message = client_socket.recv(1024).decode("utf-8")
 
-                if message.startswith("login"):
+                if message.startswith("login:"):
                     print("Nuevo intento login: " + client_address[0])
-                    credenciales = self.msgi.getCredentials(message)
-                    resp = self.db.validarCredenciales(credenciales)
-                    client_socket.send(resp.encode('utf-8'))
+                    client_thread = threading.Thread(target = self.__loginRequests, args=([client_socket]))
+                    client_thread.start()
+
+
 
 
 
@@ -52,6 +54,15 @@ class SocketServer:
 
 
 
+    def __loginRequests(self, client_socket):
+        while True:
+            data = client_socket.recv(1024).decode("utf-8")
+            if not data:
+                break
+
+            credenciales = self.msgi.getCredentials(data)
+            resp = self.db.validarCredenciales(credenciales)
+            client_socket.send(resp.encode("utf-8"))
 
 
 
@@ -109,11 +120,9 @@ class SocketServer:
             self.server_socket.close()
 
 
-
     #Metodo para imprimir en consola ya sea la del server, cliente1, cliente2, ....
     def send_message_to_server(self, sender_name, message):
         print(sender_name, message)
-
 
 
     def send_message_to_client(self, recipient, message):
@@ -121,7 +130,6 @@ class SocketServer:
             if client["name"] == recipient:
                 client["socket"].send(message.encode("utf-8"))
                 break
-
 
 
     def broadcast(self, message, sender_socket):
@@ -136,7 +144,8 @@ class SocketServer:
 class Message_Interpreter():
     
     def getCredentials(self, message):
-        username, password = message.replace("login", "").split(":", 1)
+        m = message.replace("login:", "")
+        username, password = m.split(":", 1)
         return (username, password)
 
 class DataBase_Conexion():
@@ -172,7 +181,21 @@ class DataBase_Conexion():
         """
 
         cursor.execute(query, credenciales)
-        return cursor.fetchone()
+        data = cursor.fetchone()
+        
+        if cursor.rowcount == 1:
+            return json.dumps({
+                "authenticated": True,
+                "id_cliente": data[0],
+                "nombre": data[1]
+            })
+        
+        else:
+            return json.dumps({
+                "authenticated": False,
+                "id_cliente": "",
+                "nombre": ""
+            })
 
 class Utilities():
 
