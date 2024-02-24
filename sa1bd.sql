@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 24, 2024 at 01:32 AM
+-- Generation Time: Feb 24, 2024 at 01:44 AM
 -- Server version: 11.3.2-MariaDB-1:11.3.2+maria~deb12
 -- PHP Version: 8.2.7
 
@@ -24,44 +24,25 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cliente`
+-- Table structure for table `clientes`
 --
 
-CREATE TABLE `cliente` (
+CREATE TABLE `clientes` (
   `id` int(11) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `estado` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
 
 --
--- Dumping data for table `cliente`
+-- Dumping data for table `clientes`
 --
 
-INSERT INTO `cliente` (`id`, `nombre`, `estado`) VALUES
+INSERT INTO `clientes` (`id`, `nombre`, `estado`) VALUES
 (1, 'Herber Roman Alvarado', 1),
-(4, 'Jairo Vargas', 1),
-(5, 'Eddy Caceres', 1),
-(6, 'Carlos O.', 1),
-(7, 'Jose Salasar', 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cuotaestado`
---
-
-CREATE TABLE `cuotaestado` (
-  `id` int(11) NOT NULL,
-  `descripcion` varchar(9) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
-
---
--- Dumping data for table `cuotaestado`
---
-
-INSERT INTO `cuotaestado` (`id`, `descripcion`) VALUES
-(1, 'aplicado'),
-(2, 'pendiente');
+(2, 'Jairo Vargas', 1),
+(3, 'Eddy Caceres', 1),
+(4, 'Carlos O.', 1),
+(5, 'Jose Salasar', 1);
 
 -- --------------------------------------------------------
 
@@ -82,38 +63,57 @@ CREATE TABLE `cuotas` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `estadocliente`
+-- Table structure for table `estados_cliente`
 --
 
-CREATE TABLE `estadocliente` (
+CREATE TABLE `estados_cliente` (
   `id` int(11) NOT NULL,
   `descripcion` varchar(8) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
 
 --
--- Dumping data for table `estadocliente`
+-- Dumping data for table `estados_cliente`
 --
 
-INSERT INTO `estadocliente` (`id`, `descripcion`) VALUES
+INSERT INTO `estados_cliente` (`id`, `descripcion`) VALUES
 (1, 'activo'),
 (2, 'inactivo');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `estadoprestamo`
+-- Table structure for table `estados_cuota`
 --
 
-CREATE TABLE `estadoprestamo` (
+CREATE TABLE `estados_cuota` (
   `id` int(11) NOT NULL,
   `descripcion` varchar(9) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
 
 --
--- Dumping data for table `estadoprestamo`
+-- Dumping data for table `estados_cuota`
 --
 
-INSERT INTO `estadoprestamo` (`id`, `descripcion`) VALUES
+INSERT INTO `estados_cuota` (`id`, `descripcion`) VALUES
+(1, 'aplicado'),
+(2, 'pendiente');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `estados_prestamo`
+--
+
+CREATE TABLE `estados_prestamo` (
+  `id` int(11) NOT NULL,
+  `descripcion` varchar(9) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
+
+--
+-- Dumping data for table `estados_prestamo`
+--
+
+INSERT INTO `estados_prestamo` (`id`, `descripcion`) VALUES
 (1, 'activo'),
 (2, 'cancelado');
 
@@ -149,33 +149,38 @@ CREATE TABLE `reversion` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `usuairo`
+-- Table structure for table `usuairos`
 --
 
-CREATE TABLE `usuairo` (
+CREATE TABLE `usuairos` (
   `id` int(11) NOT NULL,
   `id_cliente` int(11) NOT NULL,
   `cod_usuario` varchar(20) NOT NULL,
   `clave` varchar(12) NOT NULL,
-  `estado` int(11) NOT NULL
+  `estado` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
+
+--
+-- Dumping data for table `usuairos`
+--
+
+INSERT INTO `usuairos` (`id`, `id_cliente`, `cod_usuario`, `clave`, `estado`) VALUES
+(1, 1, 'herbera', '123', 1),
+(2, 2, 'jairov', '123', 1),
+(3, 3, 'eddyc', '123', 1),
+(4, 4, 'carloso', '123', 1),
+(5, 5, 'joses', '123', 1);
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `cliente`
+-- Indexes for table `clientes`
 --
-ALTER TABLE `cliente`
+ALTER TABLE `clientes`
   ADD PRIMARY KEY (`id`),
   ADD KEY `Estado` (`estado`) USING BTREE;
-
---
--- Indexes for table `cuotaestado`
---
-ALTER TABLE `cuotaestado`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `cuotas`
@@ -187,15 +192,21 @@ ALTER TABLE `cuotas`
   ADD KEY `IdCliente` (`id_cliente`,`id_prestamo`,`estado`) USING BTREE;
 
 --
--- Indexes for table `estadocliente`
+-- Indexes for table `estados_cliente`
 --
-ALTER TABLE `estadocliente`
+ALTER TABLE `estados_cliente`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `estadoprestamo`
+-- Indexes for table `estados_cuota`
 --
-ALTER TABLE `estadoprestamo`
+ALTER TABLE `estados_cuota`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `estados_prestamo`
+--
+ALTER TABLE `estados_prestamo`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -215,11 +226,12 @@ ALTER TABLE `reversion`
   ADD KEY `Idprestamo` (`id_prestamo`,`id_cuota`) USING BTREE;
 
 --
--- Indexes for table `usuairo`
+-- Indexes for table `usuairos`
 --
-ALTER TABLE `usuairo`
+ALTER TABLE `usuairos`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `idCliente` (`id_cliente`),
+  ADD UNIQUE KEY `cod_usuario` (`cod_usuario`),
   ADD KEY `Estado` (`estado`) USING BTREE;
 
 --
@@ -227,16 +239,10 @@ ALTER TABLE `usuairo`
 --
 
 --
--- AUTO_INCREMENT for table `cliente`
+-- AUTO_INCREMENT for table `clientes`
 --
-ALTER TABLE `cliente`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `cuotaestado`
---
-ALTER TABLE `cuotaestado`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `clientes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `cuotas`
@@ -245,15 +251,21 @@ ALTER TABLE `cuotas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `estadocliente`
+-- AUTO_INCREMENT for table `estados_cliente`
 --
-ALTER TABLE `estadocliente`
+ALTER TABLE `estados_cliente`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `estadoprestamo`
+-- AUTO_INCREMENT for table `estados_cuota`
 --
-ALTER TABLE `estadoprestamo`
+ALTER TABLE `estados_cuota`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `estados_prestamo`
+--
+ALTER TABLE `estados_prestamo`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
@@ -269,35 +281,35 @@ ALTER TABLE `reversion`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `usuairo`
+-- AUTO_INCREMENT for table `usuairos`
 --
-ALTER TABLE `usuairo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+ALTER TABLE `usuairos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `cliente`
+-- Constraints for table `clientes`
 --
-ALTER TABLE `cliente`
-  ADD CONSTRAINT `cliente_ibfk_1` FOREIGN KEY (`estado`) REFERENCES `estadocliente` (`id`);
+ALTER TABLE `clientes`
+  ADD CONSTRAINT `clientes_ibfk_1` FOREIGN KEY (`estado`) REFERENCES `estados_cliente` (`id`);
 
 --
 -- Constraints for table `cuotas`
 --
 ALTER TABLE `cuotas`
-  ADD CONSTRAINT `cuotas_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id`),
-  ADD CONSTRAINT `cuotas_ibfk_3` FOREIGN KEY (`estado`) REFERENCES `cuotaestado` (`id`),
+  ADD CONSTRAINT `cuotas_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id`),
+  ADD CONSTRAINT `cuotas_ibfk_3` FOREIGN KEY (`estado`) REFERENCES `estados_cuota` (`id`),
   ADD CONSTRAINT `cuotas_ibfk_4` FOREIGN KEY (`id_prestamo`) REFERENCES `prestamos` (`id`);
 
 --
 -- Constraints for table `prestamos`
 --
 ALTER TABLE `prestamos`
-  ADD CONSTRAINT `prestamos_ibfk_2` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id`),
-  ADD CONSTRAINT `prestamos_ibfk_3` FOREIGN KEY (`estado`) REFERENCES `estadoprestamo` (`id`);
+  ADD CONSTRAINT `prestamos_ibfk_2` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id`),
+  ADD CONSTRAINT `prestamos_ibfk_3` FOREIGN KEY (`estado`) REFERENCES `estados_prestamo` (`id`);
 
 --
 -- Constraints for table `reversion`
@@ -307,11 +319,11 @@ ALTER TABLE `reversion`
   ADD CONSTRAINT `reversion_ibfk_2` FOREIGN KEY (`id_cuota`) REFERENCES `cuotas` (`id`);
 
 --
--- Constraints for table `usuairo`
+-- Constraints for table `usuairos`
 --
-ALTER TABLE `usuairo`
-  ADD CONSTRAINT `usuairo_ibfk_1` FOREIGN KEY (`estado`) REFERENCES `estadocliente` (`id`),
-  ADD CONSTRAINT `usuairo_ibfk_2` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id`);
+ALTER TABLE `usuairos`
+  ADD CONSTRAINT `usuairos_ibfk_1` FOREIGN KEY (`estado`) REFERENCES `estados_cliente` (`id`),
+  ADD CONSTRAINT `usuairos_ibfk_2` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
