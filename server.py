@@ -9,6 +9,7 @@ class Server:
     def __init__(self, parametros):
         self.host  = parametros["server_ip"]
         self.port  = parametros["server_port"]
+        self.msgi  = parametros["minterp"]
         self.db    = parametros["database_conexion"]
         self.utils = parametros["utilities"]
 
@@ -37,7 +38,9 @@ class Server:
                 message = client_socket.recv(1024).decode("utf-8")
 
                 if message.startswith("credenciales"):
-            	    pass
+            	    credenciales = self.msgi.getCredentials(message)
+                    #self.db.validarCredenciales(credenciales)
+
 
                 elif message.startswith("chat"):
                     pass
@@ -107,7 +110,7 @@ class Server:
 
 
 
-    #Metodos para imprimir en consola ya sea la del server, cliente1, cliente2, ....
+    #Metodo para imprimir en consola ya sea la del server, cliente1, cliente2, ....
     def send_message_to_server(self, sender_name, message):
         print(sender_name, message)
 
@@ -129,14 +132,16 @@ class Server:
 
 
 
-
-
-
-
+class Message_Interpreter():
+    
+    def getCredentials(self, message):
+        username, password = message.replace("credenciales", "").split(":", 1)
+        return (username, password)
 
 
 class DataBase_Conexion():
 
+    #Prepara un objeto conexion ============
     def __init__(self):
         try:
             self.conexion = mariadb.connect(
@@ -147,56 +152,46 @@ class DataBase_Conexion():
                 database="sa1bd"
             )
 
+            #self.conexion.autocommit = False
+
         except BaseException as error:
             print(error)
 
 
-    def validarCredenciales(self, trama):
-        subTramas = trama.split("-", 2)
-        username = subTramas[2]
-        password = subTramas[3]
 
+    def validarCredenciales(self, credenciales):
         cursor = self.conexion.cursor()
-        query = "SELECT COUNT(*) FROM usuairo WHERE codUsuario = %s AND clave = %s"
-        cursor.execute(query, (username, password))
+
+        query = "SELECT COUNT(*) FROM usuairo WHERE codUsuario = ? AND clave = ?"
+        cursor.execute(query, credenciales)
         respuesta = cursor.fetchone()
 
-        print(respuesta)
-        self.conexion.close()
-
-    """
-        if respuesta:
-            cliente_id = resultado[0]
-            messagebox.showinfo("Inicio de sesión exitoso", "¡Bienvenido!")
-            root.destroy()
-            subprocess.run(["python", "menu.py", str(cliente_id)])  # Pasar cliente_id como argumento al menú
-        else:
-            messagebox.showerror("Error de inicio de sesión", "Credenciales incorrectas")
-    """
+        
 
 
 class Utilities():
 
     #Manejador de errores de socket =======================================
-    def error_handler(self, errorType):
+    def error_handler(self, e):
         msj = None
 
-        if(type(errorType) is KeyboardInterrupt):
+        if(type(e) is KeyboardInterrupt):
             msj = "Script terminado por teclado"
 
-        elif(type(errorType) is ValueError):
+        elif(type(e) is ValueError):
             msj = "Usuario abandonó"
 
-        elif(type(errorType) is OSError):
+        elif(type(e) is OSError):
             msj = "Direccion en uso. Utilize: ss -ltpn | grep [server_port]"
+
+        elif(type(e) is mariadb.Error):
+            msj = "Error con la base de datos:\n{e}"
 
         else: print("Nuevo Error:", errorType)
 
         self.limpiarConsola()
         print(msj + "\n\n")
         exit()
-
-
 
 
     #Limpiar pantalla =====================================================
@@ -215,6 +210,7 @@ if __name__ == "__main__":
     parametros = {
         "server_ip": '172.31.30.203',
         "server_port": 9999,
+        "minterp": Message_Interpreter(),
         "database_conexion": DataBase_Conexion(),
         "utilities": Utilities()
     }
