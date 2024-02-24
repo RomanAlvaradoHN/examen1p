@@ -152,7 +152,7 @@ CREATE TABLE `reversion` (
 -- Table structure for table `usuairos`
 --
 
-CREATE TABLE `usuairos` (
+CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `id_cliente` int(11) NOT NULL,
   `cod_usuario` varchar(20) NOT NULL,

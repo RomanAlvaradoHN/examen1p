@@ -23,9 +23,6 @@ class Server:
             print("===============================================================")
             print(f"\n    Servidor escuchando en {self.host}:{self.port}        \n")
             print("===============================================================")
-
-
-
         except BaseException as errorType:
             self.utils.error_handler(errorType)
 
@@ -37,9 +34,9 @@ class Server:
                 message = client_socket.recv(1024).decode("utf-8")
 
                 if message.startswith("credenciales"):
-                    print("Nuevo login:" + client_address)
-            	    credenciales = self.msgi.getCredentials(message)
-                    #self.db.validarCredenciales(credenciales)
+                    print("Nuevo intento login: " + client_address[0])
+                    credenciales = self.msgi.getCredentials(message)
+                    print(self.db.validarCredenciales(credenciales))
 
 
                 elif message.startswith("chat"):
@@ -162,10 +159,17 @@ class DataBase_Conexion():
     def validarCredenciales(self, credenciales):
         cursor = self.conexion.cursor()
 
-        query = "SELECT COUNT(*) FROM usuairo WHERE codUsuario = ? AND clave = ?"
+        query = """
+        SELECT a.id_cliente, b.nombre        
+        FROM usuarios a
+        INNER JOIN clientes b ON b.id = a.id_cliente AND b.estado = 1   
+        WHERE a.cod_usuario = ?
+        AND a.clave = ?
+        AND a.estado = 1
+        """
+
         cursor.execute(query, credenciales)
-        #respuesta = cursor.fetchone()
-        print(cursor)
+        return cursor.fetchone()
 
         
 
@@ -174,7 +178,7 @@ class Utilities():
 
     #Manejador de errores de socket =======================================
     def error_handler(self, e):
-        msj = None
+        msj = ""
 
         if(type(e) is KeyboardInterrupt):
             msj = "Script terminado por teclado"
@@ -188,7 +192,8 @@ class Utilities():
         elif(type(e) is mariadb.Error):
             msj = "Error con la base de datos:\n{e}"
 
-        else: print("Nuevo Error:", errorType)
+        else:    
+            msj = f"Error: {type(e)}\n{e}"
 
         self.limpiarConsola()
         print(msj + "\n\n")
