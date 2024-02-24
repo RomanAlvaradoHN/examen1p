@@ -1,6 +1,12 @@
 import sys
 import tkinter as tk
 import subprocess
+import json
+
+
+#cliente_id = sys.argv[1] if len(sys.argv) > 1 else None  # Obtener el ID del cliente de los argumentos de la línea de comandos
+data = sys.argv[1]
+
 
 def abrir_prestamos():
     root.destroy()
@@ -53,9 +59,11 @@ boton_reversiones.pack(pady=5)
 boton_chat = tk.Button(root, text="Chat", font=button_font, width=button_width, height=button_height, relief=button_relief_style, bg=button_bg_color, command=abrir_chat)
 boton_chat.pack(pady=5)
 
-cliente_id = sys.argv[1] if len(sys.argv) > 1 else None  # Obtener el ID del cliente de los argumentos de la línea de comandos
 
-id_label = tk.Label(root, text=f"Cliente: {cliente_id}", font=("Arial Black", 12), bg=background_color)
+
+id_label = tk.Label(root, text=f"Cliente: {data["nombre"]}", font=("Arial Black", 12), bg=background_color)
 id_label.pack(pady=10)
+
+
 
 root.mainloop()

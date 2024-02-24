@@ -97,11 +97,18 @@ class ClientSocket():
     def receive(self):
 
         while True:
-            data = self.client_socket.recv(1024)
+            data = self.client_socket.recv(1024).decode("utf-8")
             if not data:
                 break
 
-            print(data.decode("utf-8"))
+            print(str(type(data)) + ":\n" + data)
+            
+            resp = json.loads(data)
+            if resp["authenticated"]:
+                subprocess.run(["python", "menu.py", str(data)])
+                
+            
+
 
 
 
@@ -142,14 +149,6 @@ class Utilities():
 """
 cliente_id = None
 
-def verificar_credenciales(usuario, contraseña):
-
-
-        cursor = conexion.cursor()
-        consulta = "SELECT idCliente FROM usuairo WHERE codUsuario = %s AND clave = %s"
-        cursor.execute(consulta, (usuario, contraseña))
-        resultado = cursor.fetchone()
-        conexion.close()
 
         if resultado:
             cliente_id = resultado[0]
