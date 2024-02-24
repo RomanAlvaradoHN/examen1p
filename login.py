@@ -52,10 +52,14 @@ class Ventana():
     
     
     #Validacion de credenciales ==========================================
-    def __validarCredenciales(self): #Inicio de trama: 1
+    def __validarCredenciales(self):
         username = self.entry_username.get()
         password = self.entry_password.get()
-        self.sokt.send(f"credenciales:{username}:{password}")
+
+        receive_thread = threading.Thread(target=self.sokt.receive)
+        receive_thread.start()
+        
+        self.sokt.send(f"login:{username}:{password}")
 
 
 
@@ -107,20 +111,23 @@ class ClientSocket():
 class Utilities():
 
     #Manejador de errores de socket =======================================
-    def error_handler(self, errorType):
+    def error_handler(self, e):
         msj = ""
 
-        if(type(errorType) is ConnectionRefusedError):
-            msj = "El servidor denegó la conexión.\nValide que este activo y escuchando."
-
-        if(type(errorType) is KeyboardInterrupt):
+        if(type(e) is KeyboardInterrupt):
             msj = "Script terminado por teclado"
 
-        elif(type(errorType) is ValueError):
+        elif(type(e) is ValueError):
             msj = "Usuario abandonó"
 
-        else: print("Nuevo Error:", errorType)
-        
+        elif(type(e) is OSError):
+            msj = "Direccion en uso. Utilize: ss -ltpn | grep [server_port]"
+
+        elif(type(e) is mariadb.Error):
+            msj = "Error con la base de datos:\n{e}"
+
+        else:    
+            msj = f"Error: {type(e)}\n{e}"
 
         self.limpiarConsola()
         print(msj + "\n\n")
