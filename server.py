@@ -3,7 +3,7 @@ import threading
 import os
 import mariadb
 
-class Server:
+class SocketServer:
 
 
     def __init__(self, parametros):
@@ -33,10 +33,13 @@ class Server:
                 client_socket, client_address = self.server_socket.accept()
                 message = client_socket.recv(1024).decode("utf-8")
 
-                if message.startswith("credenciales"):
+                if message.startswith("login"):
                     print("Nuevo intento login: " + client_address[0])
                     credenciales = self.msgi.getCredentials(message)
-                    print(self.db.validarCredenciales(credenciales))
+                    resp = self.db.validarCredenciales(credenciales)
+                    client_socket.send(resp.encode('utf-8'))
+
+
 
 
                 elif message.startswith("chat"):
@@ -129,12 +132,12 @@ class Server:
 
 
 
+#Clases de trabajo =============================================================
 class Message_Interpreter():
     
     def getCredentials(self, message):
-        username, password = message.replace("credenciales", "").split(":", 1)
+        username, password = message.replace("login", "").split(":", 1)
         return (username, password)
-
 
 class DataBase_Conexion():
 
@@ -170,9 +173,6 @@ class DataBase_Conexion():
 
         cursor.execute(query, credenciales)
         return cursor.fetchone()
-
-        
-
 
 class Utilities():
 
@@ -210,6 +210,9 @@ class Utilities():
 
 
 
+
+
+
 #Bloque de entrada e inicio del script =========================================
 if __name__ == "__main__":
 
@@ -221,4 +224,4 @@ if __name__ == "__main__":
         "utilities": Utilities()
     }
 
-    server = Server(parametros)
+    server = SocketServer(parametros)
