@@ -37,6 +37,7 @@ class Server:
                 message = client_socket.recv(1024).decode("utf-8")
 
                 if message.startswith("credenciales"):
+                    print("Nuevo login:" + client_address)
             	    credenciales = self.msgi.getCredentials(message)
                     #self.db.validarCredenciales(credenciales)
 

@@ -108,7 +108,10 @@ class Utilities():
 
     #Manejador de errores de socket =======================================
     def error_handler(self, errorType):
-        msj = None
+        msj = ""
+
+        if(type(errorType) is ConnectionRefusedError):
+            msj = "El servidor denegó la conexión.\nValide que este activo y escuchando."
 
         if(type(errorType) is KeyboardInterrupt):
             msj = "Script terminado por teclado"
