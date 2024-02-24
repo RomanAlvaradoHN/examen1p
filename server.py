@@ -34,7 +34,7 @@ class SocketServer:
                 client_socket, client_address = self.server_socket.accept()
                 message = client_socket.recv(1024).decode("utf-8")
 
-                if message.startswith("login:"):
+                if message.startswith("login"):
                     print("Nuevo intento login: " + client_address[0])
                     client_thread = threading.Thread(target = self.__loginRequests, args=([client_socket]))
                     client_thread.start()

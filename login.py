@@ -4,6 +4,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 import subprocess
+import json
 
 class Ventana():
 
@@ -80,6 +81,7 @@ class ClientSocket():
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.client_socket.connect((parametros["server_ip"], parametros["server_port"]))
             print("Socket establecido con éxito")
+            self.send("login")
         
         except BaseException as errorType: 
             self.utils.error_handler(errorType)
@@ -101,8 +103,6 @@ class ClientSocket():
             if not data:
                 break
             
-            #print(data.decode("utf-8"))
-
             message = data.decode("utf-8")
             print(message)
 
@@ -123,8 +123,8 @@ class Utilities():
         elif(type(e) is OSError):
             msj = "Direccion en uso. Utilize: ss -ltpn | grep [server_port]"
 
-        elif(type(e) is mariadb.Error):
-            msj = "Error con la base de datos:\n{e}"
+        elif(type(e) is ConnectionRefusedError):
+            msj = "Conexion rechazada. Valide que el servidor este activo y a la escucha"
 
         else:    
             msj = f"Error: {type(e)}\n{e}"
@@ -168,7 +168,7 @@ def verificar_credenciales(usuario, contraseña):
 #INICIO DE SCRIPT========================================================================
 parametros = {
     "clientsocket": ClientSocket({
-        "server_ip": "ec2-18-191-109-242.us-east-2.compute.amazonaws.com",
+        "server_ip": "ec2-18-118-83-42.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
     }),
