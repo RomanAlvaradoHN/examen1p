@@ -158,7 +158,7 @@ def verificar_credenciales(usuario, contraseña):
 #INICIO DE SCRIPT========================================================================
 parametros = {
     "clientsocket": ClientSocket({
-        "server_ip": "ec2-3-143-210-52.us-east-2.compute.amazonaws.com",
+        "server_ip": "ec2-18-191-109-242.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
     }),

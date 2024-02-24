@@ -20,7 +20,7 @@ class Server:
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
-
+            print(os.system("ip addr show enX0 | grep -oP 'inet \K[\d.]+"))
             print("===============================================================")
             print(f"\n    Servidor escuchando en {self.host}:{self.port}        \n")
             print("===============================================================")
@@ -164,7 +164,8 @@ class DataBase_Conexion():
 
         query = "SELECT COUNT(*) FROM usuairo WHERE codUsuario = ? AND clave = ?"
         cursor.execute(query, credenciales)
-        respuesta = cursor.fetchone()
+        #respuesta = cursor.fetchone()
+        print(cursor)
 
         
 
