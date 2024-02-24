@@ -46,7 +46,7 @@ class Ventana():
 
         boton_ingresar = tk.Button(root, text="Ingresar", command=self.__validarCredenciales, font=fuente, bg='limegreen', fg='white', bd=0)
         boton_ingresar.pack(pady=10)
-        
+
         root.mainloop()
 
     
@@ -65,7 +65,8 @@ class Ventana():
 
 
 
-class ClientSocket():   
+class ClientSocket():
+
     
     #Constructor de clase =============================
     def __init__(self, parametros):
@@ -81,6 +82,7 @@ class ClientSocket():
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()
 
+            self.resp = {"authenticated": False}
             self.send("login")
 
         except BaseException as errorType: 
@@ -103,11 +105,11 @@ class ClientSocket():
 
             print(str(type(data)) + ":\n" + data)
             
-            resp = json.loads(data)
-            if resp["authenticated"]:
-                subprocess.run(["python", "menu.py", str(data)])
-                
+            self.resp = json.loads(data)
             
+            if self.resp["authenticated"]:
+                subprocess.run(["python", "menu.py", str(data)])
+
 
 
 

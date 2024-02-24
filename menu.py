@@ -5,7 +5,7 @@ import json
 
 
 #cliente_id = sys.argv[1] if len(sys.argv) > 1 else None  # Obtener el ID del cliente de los argumentos de la línea de comandos
-data = sys.argv[1]
+data = json.loads(sys.argv[1])
 
 
 def abrir_prestamos():
