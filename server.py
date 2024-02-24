@@ -190,12 +190,7 @@ class DataBase_Conexion():
                 "nombre": data[1]
             })
         
-        else:
-            return json.dumps({
-                "authenticated": False,
-                "id_cliente": "",
-                "nombre": ""
-            })
+        else: return json.dumps({"authenticated": False})
 
 class Utilities():
 

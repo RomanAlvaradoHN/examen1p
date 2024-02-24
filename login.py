@@ -48,19 +48,15 @@ class Ventana():
         boton_ingresar.pack(pady=10)
         
         root.mainloop()
-       
 
-    
     
     #Validacion de credenciales ==========================================
     def __validarCredenciales(self):
         username = self.entry_username.get()
         password = self.entry_password.get()
 
-        receive_thread = threading.Thread(target=self.sokt.receive)
-        receive_thread.start()
-        
         self.sokt.send(f"login:{username}:{password}")
+
 
 
 
@@ -81,8 +77,12 @@ class ClientSocket():
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.client_socket.connect((parametros["server_ip"], parametros["server_port"]))
             print("Socket establecido con éxito")
+
+            receive_thread = threading.Thread(target=self.receive)
+            receive_thread.start()
+
             self.send("login")
-        
+
         except BaseException as errorType: 
             self.utils.error_handler(errorType)
             self.server_socket.close()
@@ -97,14 +97,11 @@ class ClientSocket():
     def receive(self):
 
         while True:
-
             data = self.client_socket.recv(1024)
-            
             if not data:
                 break
-            
-            message = data.decode("utf-8")
-            print(message)
+
+            print(data.decode("utf-8"))
 
 
 
