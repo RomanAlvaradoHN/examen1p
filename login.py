@@ -10,7 +10,7 @@ class Ventana():
 
     #Constructor de clase (ventana login )================================
     def __init__(self, parametros):
-        self.sokt   = parametros["clientsocket"]
+        self.lsocket   = parametros["loginsocket"]
         self.utils  = parametros["utils"]
         root        = tk.Tk()
         
@@ -52,63 +52,60 @@ class Ventana():
     
     #Validacion de credenciales ==========================================
     def __validarCredenciales(self):
-        username = self.entry_username.get()
-        password = self.entry_password.get()
-
-        self.sokt.send(f"login:{username}:{password}")
-
-
-
-
+        self.lsocket.send(
+            json.dumps({
+                "username": self.entry_username.get(),
+                "password": self.entry_password.get()
+            })
+        )
 
 
 
 
 
-class ClientSocket():
 
-    
-    #Constructor de clase =============================
+
+
+
+class LoginSocket():
+    #Constructor de clase ============================
     def __init__(self, parametros):
         self.utils = parametros["utils"]
 
         try:
             #Establecer conexion de socket =============
             self.utils.limpiarConsola()
-            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
-            self.client_socket.connect((parametros["server_ip"], parametros["server_port"]))
+            self.login_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+            self.login_socket.connect((parametros["server_ip"], parametros["server_port"]))
             print("Socket establecido con éxito")
 
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()
 
-            self.resp = {"authenticated": False}
-            self.send("login")
+            self.send("login") 
 
         except BaseException as errorType: 
             self.utils.error_handler(errorType)
             self.server_socket.close()
 
 
-    #Enviar trama a servidor ==========================
+    #Enviar mensaje al socket servidor ===============
     def send(self, message):
-        self.client_socket.send(message.encode("utf-8"))
+        self.login_socket.send(message.encode("utf-8"))
 
 
-    #Recibir respuesta de servidor ====================
+    #Recibir mensajes del socket servidor ============
     def receive(self):
 
         while True:
-            data = self.client_socket.recv(1024).decode("utf-8")
-            if not data:
-                break
+            data = self.login_socket.recv(1024).decode("utf-8")
+            
+            if not data: break
 
-            print(str(type(data)) + ":\n" + data)
-            
-            self.resp = json.loads(data)
-            
-            if self.resp["authenticated"]:
+            if json.loads(data)["authenticated"]:
                 subprocess.run(["python", "menu.py", str(data)])
+            else:
+                messagebox.showwarning("Login:", "Credenciales no validas")
 
 
 
@@ -148,25 +145,12 @@ class Utilities():
         else:  # Linux, Unix, macOS
             os.system('clear')
 
-"""
-cliente_id = None
 
 
-        if resultado:
-            cliente_id = resultado[0]
-            messagebox.showinfo("Inicio de sesión exitoso", "¡Bienvenido!")
-            root.destroy()
-            subprocess.run(["python", "menu.py", str(cliente_id)])  # Pasar cliente_id como argumento al menú
-        else:
-            messagebox.showerror("Error de inicio de sesión", "Credenciales incorrectas")
-    except mysql.connector.Error as error:
-        messagebox.showerror("Error de conexión", f"No se pudo conectar a la base de datos: {error}")
-
-    """
 #INICIO DE SCRIPT========================================================================
 parametros = {
-    "clientsocket": ClientSocket({
-        "server_ip": "ec2-18-118-83-42.us-east-2.compute.amazonaws.com",
+    "loginsocket": LoginSocket({
+        "server_ip": "ec2-18-217-182-48.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
     }),

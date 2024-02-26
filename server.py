@@ -6,7 +6,6 @@ import json
 
 class SocketServer:
 
-
     def __init__(self, parametros):
         self.host  = parametros["server_ip"]
         self.port  = parametros["server_port"]
@@ -56,13 +55,12 @@ class SocketServer:
 
     def __loginRequests(self, client_socket):
         while True:
-            data = client_socket.recv(1024).decode("utf-8")
-            if not data:
-                break
-
-            credenciales = self.msgi.getCredentials(data)
+            credenciales = login.loads(client_socket.recv(1024).decode("utf-8"))
+            
+            if not data: break
+            ****
             resp = self.db.validarCredenciales(credenciales)
-            client_socket.send(resp.encode("utf-8"))
+            client_socket.send(resp.encode())
 
 
 
@@ -149,7 +147,6 @@ class Message_Interpreter():
         return (username, password)
 
 class DataBase_Conexion():
-
     #Prepara un objeto conexion ============
     def __init__(self):
         try:
