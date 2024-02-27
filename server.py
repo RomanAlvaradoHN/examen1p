@@ -55,12 +55,10 @@ class SocketServer:
 
     def __loginRequests(self, client_socket):
         while True:
-            credenciales = login.loads(client_socket.recv(1024).decode("utf-8"))
+            credenciales = json.loads(client_socket.recv(1024).decode("utf-8"))
             
-            print(credenciales)
-            
-            #resp = self.db.validarCredenciales(credenciales)
-            #client_socket.send(resp.encode())
+            resp = self.db.validarCredenciales(credenciales.values())
+            client_socket.send(resp.encode())
 
 
 
@@ -138,13 +136,6 @@ class SocketServer:
 
 
 
-#Clases de trabajo =============================================================
-class Message_Interpreter():
-    
-    def getCredentials(self, message):
-        m = message.replace("login:", "")
-        username, password = m.split(":", 1)
-        return (username, password)
 
 class DataBase_Conexion():
     #Prepara un objeto conexion ============

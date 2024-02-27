@@ -150,7 +150,7 @@ class Utilities():
 #INICIO DE SCRIPT========================================================================
 parametros = {
     "loginsocket": LoginSocket({
-        "server_ip": "ec2-18-217-182-48.us-east-2.compute.amazonaws.com",
+        "server_ip": "ec2-3-138-139-120.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
     }),
