@@ -9,7 +9,6 @@ class SocketServer:
     def __init__(self, parametros):
         self.host  = parametros["server_ip"]
         self.port  = parametros["server_port"]
-        self.msgi  = parametros["minterp"]
         self.db    = parametros["database_conexion"]
         self.utils = parametros["utilities"]
 
@@ -225,7 +224,6 @@ if __name__ == "__main__":
     parametros = {
         "server_ip": '172.31.30.203',
         "server_port": 9999,
-        "minterp": Message_Interpreter(),
         "database_conexion": DataBase_Conexion(),
         "utilities": Utilities()
     }
