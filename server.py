@@ -57,10 +57,10 @@ class SocketServer:
         while True:
             credenciales = login.loads(client_socket.recv(1024).decode("utf-8"))
             
-            if not data: break
-            ****
-            resp = self.db.validarCredenciales(credenciales)
-            client_socket.send(resp.encode())
+            print(credenciales)
+            
+            #resp = self.db.validarCredenciales(credenciales)
+            #client_socket.send(resp.encode())
 
 
 
