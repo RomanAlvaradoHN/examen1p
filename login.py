@@ -6,11 +6,13 @@ from tkinter import messagebox
 import subprocess
 import json
 
-class Ventana():
 
-    #Constructor de clase (ventana login )================================
+############################################################################
+#CONSTRUCCION DE LA VENTANA
+############################################################################
+class Ventana():
     def __init__(self, parametros):
-        self.lsocket   = parametros["loginsocket"]
+        self.login_socket   = parametros["login_socket"]
         self.utils  = parametros["utils"]
         root        = tk.Tk()
         
@@ -44,15 +46,17 @@ class Ventana():
         self.entry_password = tk.Entry(root, show="*", font=fuente)
         self.entry_password.pack()
 
-        boton_ingresar = tk.Button(root, text="Ingresar", command=self.__validarCredenciales, font=fuente, bg='limegreen', fg='white', bd=0)
+        boton_ingresar = tk.Button(root, text="Ingresar", command=self.validar_credenciales, font=fuente, bg='limegreen', fg='white', bd=0)
         boton_ingresar.pack(pady=10)
 
         root.mainloop()
 
     
-    #Validacion de credenciales ==========================================
-    def __validarCredenciales(self):
-        self.lsocket.send(
+    ############################################################################
+    #ACCION DE BOTON LOGIN
+    ############################################################################
+    def validar_credenciales(self):
+        self.login_socket.send(
             json.dumps({
                 "username": self.entry_username.get(),
                 "password": self.entry_password.get()
@@ -66,18 +70,23 @@ class Ventana():
 
 
 
-
+############################################################################
+#SOCKET CLIENTE
+############################################################################
 class LoginSocket():
-    #Constructor de clase ============================
     def __init__(self, parametros):
         self.utils = parametros["utils"]
 
+        ############################################################################
+        #PUESTA EN MARCHA DEL SOCKET CLIENTE
+        ############################################################################
         try:
-            #Establecer conexion de socket =============
             self.utils.limpiarConsola()
             self.login_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.login_socket.connect((parametros["server_ip"], parametros["server_port"]))
-            print("Socket establecido con éxito")
+            print("===============================================================")
+            print(f"\nSocket Cliente Establecido:\nhost: {parametros["server_ip"]}\nport: {parametros["server_port"]}\n")
+            print("===============================================================")
 
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()
@@ -89,18 +98,21 @@ class LoginSocket():
             self.server_socket.close()
 
 
-    #Enviar mensaje al socket servidor ===============
+    ############################################################################
+    #ENVIO DE MENSAJES A SOCKET SERVIDOR
+    ############################################################################
     def send(self, message):
         self.login_socket.send(message.encode("utf-8"))
 
 
-    #Recibir mensajes del socket servidor ============
+    
+    
+    ############################################################################
+    #RECEPCION DE MENSAJES DEL SOCKET SERVIDOR
+    ############################################################################
     def receive(self):
-
         while True:
             data = self.login_socket.recv(1024).decode("utf-8")
-            
-            if not data: break
 
             if json.loads(data)["authenticated"]:
                 subprocess.run(["python", "menu.py", str(data)])
@@ -111,6 +123,13 @@ class LoginSocket():
 
 
 
+
+
+
+
+############################################################################
+#CONTROL DE EXCEPCIONES
+############################################################################
 class Utilities():
 
     #Manejador de errores de socket =======================================
@@ -147,10 +166,18 @@ class Utilities():
 
 
 
-#INICIO DE SCRIPT========================================================================
+
+
+
+
+
+
+############################################################################
+#BLOQUE DE INICIO DE SCRIPT LOGIN.PY
+############################################################################
 parametros = {
-    "loginsocket": LoginSocket({
-        "server_ip": "ec2-3-138-139-120.us-east-2.compute.amazonaws.com",
+    "login_socket": LoginSocket({
+        "server_ip": "ec2-3-139-109-145.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
     }),
