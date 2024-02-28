@@ -91,7 +91,7 @@ class LoginSocket():
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()
 
-            self.send("login") 
+            self.send(json.dumps({"oper": "login"}))
 
         except BaseException as errorType: 
             self.utils.error_handler(errorType)

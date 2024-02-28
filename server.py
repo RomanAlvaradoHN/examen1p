@@ -38,15 +38,31 @@ class SocketServer:
         try:
             while True:
                 client_socket, client_address = self.server_socket.accept()
-                message = client_socket.recv(1024).decode("utf-8")
+                m = json.loads(client_socket.recv(1024).decode("utf-8"))
+                operacion = m["oper"]
 
-                if message.startswith("login"):
+                if operacion == "login":
                     print("Nuevo intento login: " + client_address[0])
                     client_thread = threading.Thread(target = self.login_controller, args=([client_socket]))
                     client_thread.start()
 
 
-                elif message.startswith("chat"):
+                elif operacion == "consultar_prestamos":
+                    resp = self.db.consultar_prestamos((m["id_cliente"]))
+                    client_socket.send(resp.encode("utf-8"))
+
+
+                elif operacion == "consultar_pagos":
+                    resp = self.db.consultar_pagos((m["id_cliente"], m["id_prestamo"]))
+                    client_socket.send(resp.encode("utf-8"))
+
+
+                elif operacion == "consultar_reversiones":
+                    resp = self.db.consultar_reversiones((m["id_cliente"], m["id_prestamo"]))
+                    client_socket.send(resp.encode("utf-8"))
+
+
+                elif operacion == "chat":
                     pass
 
 
@@ -60,9 +76,12 @@ class SocketServer:
     def login_controller(self, client_socket):
         while True:
             cred = json.loads(client_socket.recv(1024).decode("utf-8"))
+
             #print(f"str(type(cred)) \n {cred}")
             resp = self.db.validar_credenciales((cred["username"], cred["password"]))
             client_socket.send(resp.encode())
+
+            if resp["authenticaded"]: break
 
 
 
@@ -150,7 +169,7 @@ class SocketServer:
 class DatabaseConexion():
     def __init__(self):
         try:
-            self.conexion = mariadb.connect(
+            self.__conexion = mariadb.connect(
                 user="admin",
                 password="grupo1",
                 host="localhost",
@@ -166,8 +185,7 @@ class DatabaseConexion():
 
 
     def validar_credenciales(self, credenciales):
-        cursor = self.conexion.cursor()
-
+        cursor = self.__conexion.cursor()
         query = """
         SELECT a.id_cliente, b.nombre
         FROM usuarios a
@@ -189,8 +207,78 @@ class DatabaseConexion():
 
 
 
+    def consultar_prestamos(self, id_cliente):
+        cursor = self.__conexion.cursor()
+
+        query = """
+        SELECT p.id id_prestamo, p.monto_prestamo, p.cuotas, p.monto_cuota, p.saldo_pendiente, e.descripcion estado
+        FROM prestamos p
+        INNER JOIN estados_prestamo e ON e.id = p.estado
+        WHERE p.id_cliente = ?"""
+
+        cursor.execute(query, id_cliente)
+
+        resp = []
+        for (id_prestamo, monto_prestamo, cuotas, monto_cuota, saldo_pendiente, estado) in cursor:
+            resp.append({
+                "id_prestamo": id_prestamo,
+                "monto_prestamo": monto_prestamo,
+                "cuotas": cuotas,
+                "monto_cuota": monto_cuota,
+                "saldo_pendiente": saldo_pendiente,
+                "estado": estado
+            })
+
+        return json.dumps(resp)
 
 
+    
+    def consultar_pagos(self, ids):
+        cursor = self.__conexion.cursor()
+
+        query = """
+        SELECT c.id id_cuota, c.id_prestamo, c.cuota, c.fecha, c.monto_cuota, e.descripcion estado
+        FROM cuotas c
+        INNER JOIN estados_cuota e ON e.id = c.estado
+        WHERE c.id_cliente = ? AND c.id_prestamo = ?"""
+
+        cursor.execute(query, ids)
+
+        resp = []
+        for (id_cuota, id_prestamo, cuota, fecha, monto_cuota, estado) in cursor:
+            resp.append({
+                "id_cuota": id_cuota,
+                "id_prestamo": id_prestamo,
+                "cuota": cuota,
+                "fecha": fecha,
+                "monto_cuota": monto_cuota,
+                "estado": estado
+            })
+
+        return json.dumps(resp)
+
+
+
+    def consultar_reversiones(self, ids):
+        cursor = self.__conexion.cursor()
+
+        query = """
+        SELECT r.id id_reversion, r.fecha, r.id_prestamo, r.id_cuota
+        FROM reversiones r
+        WHERE r.id_cliente = ? AND r.id_prestamo = ?"""
+
+        cursor.execute(query, ids)
+
+        resp = []
+        for (id_reversion, fecha, id_prestamo, id_cuota) in cursor:
+            resp.append({
+                "id_reversion": id_reversion,
+                "fecha": fecha,
+                "id_prestamo": id_prestamo,
+                "id_cuota": id_cuota
+            })
+
+        return json.dumps(resp)
 
 
 ############################################################################
