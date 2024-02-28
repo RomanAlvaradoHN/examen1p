@@ -4,6 +4,10 @@ import os
 import mariadb
 import json
 
+
+############################################################################
+#SOCKET SERVER
+############################################################################
 class SocketServer:
 
     def __init__(self, parametros):
@@ -12,9 +16,11 @@ class SocketServer:
         self.db    = parametros["database_conexion"]
         self.utils = parametros["utilities"]
 
-        #Inicio de socket ===========================================
+        ############################################################################
+        #PUESTA EN MARCHA DEL SOCKET SERVIDOR
+        ############################################################################
         try:
-            self.utils.limpiarConsola()
+            self.utils.clear_console()
             self.clients = []
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.host, self.port))
@@ -26,7 +32,9 @@ class SocketServer:
             self.utils.error_handler(errorType)
 
 
-        #Escucha de mensajes ========================================
+        ############################################################################
+        #CONTROLADOR DE FUNCIONAMIENTO DEL SOCKET SERVEIDOR
+        ############################################################################
         try:
             while True:
                 client_socket, client_address = self.server_socket.accept()
@@ -34,12 +42,8 @@ class SocketServer:
 
                 if message.startswith("login"):
                     print("Nuevo intento login: " + client_address[0])
-                    client_thread = threading.Thread(target = self.__loginRequests, args=([client_socket]))
+                    client_thread = threading.Thread(target = self.login_controller, args=([client_socket]))
                     client_thread.start()
-
-
-
-
 
 
                 elif message.startswith("chat"):
@@ -48,21 +52,39 @@ class SocketServer:
 
         except BaseException as errorType:
             self.utils.error_handler(errorType)
+       ############################################################################
+       ############################################################################
 
 
 
 
-    def __loginRequests(self, client_socket):
+
+
+
+
+
+
+
+
+
+
+
+    ############################################################################
+    #CONTROLADOR DE LOGIN
+    ############################################################################
+    def login_controller(self, client_socket):
         while True:
-            credenciales = json.loads(client_socket.recv(1024).decode("utf-8"))
-            
-            resp = self.db.validarCredenciales(credenciales.values())
+            cred = json.loads(client_socket.recv(1024).decode("utf-8"))
+            #print(f"str(type(cred)) \n {cred}")
+            resp = self.db.validar_credenciales((cred["username"], cred["password"]))
             client_socket.send(resp.encode())
 
 
 
 
-    #Obtener datos  del mensaje y determinar qué metodo procesa la salida del mensaje: ==========================
+    ############################################################################
+    #CONTROLADOR DE CHAT
+    ############################################################################
     def __handle_client(self, client_socket):
 
         #Añadimos el nuevo participante a la lista
@@ -136,8 +158,11 @@ class SocketServer:
 
 
 
-class DataBase_Conexion():
-    #Prepara un objeto conexion ============
+
+############################################################################
+#CONTROL DE BASE DE DATOS - MARIADB
+############################################################################
+class DatabaseConexion():
     def __init__(self):
         try:
             self.conexion = mariadb.connect(
@@ -155,30 +180,37 @@ class DataBase_Conexion():
 
 
 
-    def validarCredenciales(self, credenciales):
+    def validar_credenciales(self, credenciales):
         cursor = self.conexion.cursor()
 
         query = """
-        SELECT a.id_cliente, b.nombre        
+        SELECT a.id_cliente, b.nombre
         FROM usuarios a
-        INNER JOIN clientes b ON b.id = a.id_cliente AND b.estado = 1   
-        WHERE a.cod_usuario = ?
-        AND a.clave = ?
-        AND a.estado = 1
+        INNER JOIN clientes b ON b.id = a.id_cliente AND b.estado = 1
+        WHERE a.cod_usuario = ? AND a.clave = ? AND a.estado = 1
         """
 
         cursor.execute(query, credenciales)
         data = cursor.fetchone()
-        
+
         if cursor.rowcount == 1:
             return json.dumps({
                 "authenticated": True,
                 "id_cliente": data[0],
                 "nombre": data[1]
             })
-        
+
         else: return json.dumps({"authenticated": False})
 
+
+
+
+
+
+
+############################################################################
+#CONTROL DE EXCEPCIONES
+############################################################################
 class Utilities():
 
     #Manejador de errores de socket =======================================
@@ -197,16 +229,16 @@ class Utilities():
         elif(type(e) is mariadb.Error):
             msj = "Error con la base de datos:\n{e}"
 
-        else:    
+        else:
             msj = f"Error: {type(e)}\n{e}"
 
-        self.limpiarConsola()
+        self.clear_console()
         print(msj + "\n\n")
         exit()
 
 
     #Limpiar pantalla =====================================================
-    def limpiarConsola(self):
+    def clear_console(self):
         if os.name == 'nt':  # Windows
             os.system('cls')
         else:  # Linux, Unix, macOS, POSIX
@@ -224,7 +256,7 @@ if __name__ == "__main__":
     parametros = {
         "server_ip": '172.31.30.203',
         "server_port": 9999,
-        "database_conexion": DataBase_Conexion(),
+        "database_conexion": DatabaseConexion(),
         "utilities": Utilities()
     }
 
