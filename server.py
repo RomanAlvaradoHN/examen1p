@@ -62,6 +62,15 @@ class SocketServer:
                     client_socket.send(resp.encode("utf-8"))
 
 
+
+
+
+
+                elif operacion == "registrar_pago":
+                    self.db.registrar_pago((m["id_cliente"], m["id_prestamo"]))
+                    client_socket.send("RESPUESTA".encode("utf-8"))
+
+
                 elif operacion == "chat":
                     pass
 
@@ -280,6 +289,16 @@ class DatabaseConexion():
 
         return json.dumps(resp)
 
+
+
+    def registrar_pago(self, ids):
+            cursor = self.__conexion.cursor()
+
+            query = "CALL PAGO_CUOTA_PRESTAMO(?, ?)"
+            cursor.execute(query, ids)
+
+            resp = "respuesta"
+            return json.dumps(resp)
 
 ############################################################################
 #CONTROL DE EXCEPCIONES

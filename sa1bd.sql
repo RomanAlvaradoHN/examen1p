@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 28, 2024 at 04:29 AM
+-- Generation Time: Feb 29, 2024 at 04:06 AM
 -- Server version: 11.3.2-MariaDB-1:11.3.2+maria~deb12
 -- PHP Version: 8.2.7
 
@@ -20,6 +20,80 @@ SET time_zone = "+00:00";
 --
 -- Database: `sa1bd`
 --
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`admin`@`%` PROCEDURE `ACTUALIZAR_SALDO` (IN `p_id_cliente` INT, IN `p_id_prestamo` INT)   BEGIN
+    DECLARE mcuota DOUBLE;
+    DECLARE sactual DOUBLE;
+   
+    SELECT MONTOCUOTA(p_id_cliente, p_id_prestamo) INTO mcuota;
+    SELECT SALDOACTUAL(p_id_cliente, p_id_prestamo) INTO sactual;
+
+    UPDATE prestamos SET saldo_pendiente = (sactual - mcuota)
+    WHERE id_cliente = p_id_cliente AND id = p_id_prestamo;
+      
+END$$
+
+CREATE DEFINER=`admin`@`%` PROCEDURE `PAGAR_SIGUIENTE_CUOTA` (IN `p_id_cliente` INT, IN `p_id_prestamo` INT)   BEGIN
+    DECLARE ncuota INT;    
+    SELECT SCUOTA(p_id_cliente, p_id_prestamo) INTO ncuota;
+
+    UPDATE cuotas SET fecha = CURRENT_TIMESTAMP, estado = 1
+    WHERE id_cliente = p_id_cliente AND id_prestamo = p_id_prestamo
+    AND cuota = ncuota;      
+END$$
+
+CREATE DEFINER=`admin`@`%` PROCEDURE `PAGO_CUOTA_PRESTAMO` (IN `p_id_cliente` INT, IN `p_id_prestamo` INT)   BEGIN
+    CALL PAGAR_SIGUIENTE_CUOTA(p_id_cliente, p_id_prestamo);
+    CALL ACTUALIZAR_SALDO(p_id_cliente, p_id_prestamo);
+END$$
+
+--
+-- Functions
+--
+CREATE DEFINER=`admin`@`%` FUNCTION `MONTOCUOTA` (`p_id_cliente` INT, `p_id_prestamo` INT) RETURNS DOUBLE(10,0)  BEGIN
+    DECLARE ncuota INT;
+    SET ncuota = UCPAGADA(p_id_cliente, p_id_prestamo);
+
+RETURN (
+    SELECT monto_cuota FROM cuotas WHERE
+    id_cliente = p_id_cliente
+    AND id_prestamo = p_id_prestamo
+    AND cuota = ncuota
+    AND estado = 1
+);
+END$$
+
+CREATE DEFINER=`admin`@`%` FUNCTION `SALDOACTUAL` (`p_id_cliente` INT, `p_id_prestamo` INT) RETURNS DECIMAL(10,0)  BEGIN RETURN (
+    SELECT saldo_pendiente FROM prestamos
+    WHERE
+    id_cliente = p_id_cliente
+    AND id = p_id_prestamo
+);
+END$$
+
+CREATE DEFINER=`admin`@`%` FUNCTION `SCUOTA` (`p_id_cliente` INT, `p_id_prestamo` INT) RETURNS INT(11)  BEGIN
+RETURN (
+    SELECT MIN(cuota) FROM cuotas WHERE
+    id_cliente = p_id_cliente
+    AND id_prestamo = p_id_prestamo
+    AND estado = 2
+);
+END$$
+
+CREATE DEFINER=`admin`@`%` FUNCTION `UCPAGADA` (`p_id_cliente` INT, `p_id_prestamo` INT) RETURNS INT(11)  BEGIN
+RETURN (
+    SELECT MAX(cuota) FROM cuotas WHERE
+    id_cliente = p_id_cliente
+    AND id_prestamo = p_id_prestamo
+    AND estado = 1
+);
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -55,7 +129,7 @@ CREATE TABLE `cuotas` (
   `id_cliente` int(11) NOT NULL,
   `id_prestamo` int(11) NOT NULL,
   `cuota` int(11) NOT NULL,
-  `fecha` date DEFAULT NULL,
+  `fecha` timestamp NULL DEFAULT NULL,
   `monto_cuota` double NOT NULL,
   `estado` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish_ci;
