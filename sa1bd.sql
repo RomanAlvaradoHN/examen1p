@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 29, 2024 at 04:06 AM
+-- Generation Time: Mar 02, 2024 at 02:16 AM
 -- Server version: 11.3.2-MariaDB-1:11.3.2+maria~deb12
 -- PHP Version: 8.2.7
 
@@ -48,7 +48,7 @@ END$$
 
 CREATE DEFINER=`admin`@`%` PROCEDURE `PAGO_CUOTA_PRESTAMO` (IN `p_id_cliente` INT, IN `p_id_prestamo` INT)   BEGIN
     CALL PAGAR_SIGUIENTE_CUOTA(p_id_cliente, p_id_prestamo);
-    CALL ACTUALIZAR_SALDO(p_id_cliente, p_id_prestamo);
+    COMMIT;
 END$$
 
 --
@@ -255,7 +255,7 @@ CREATE TABLE `prestamos` (
 
 INSERT INTO `prestamos` (`id`, `id_cliente`, `monto_prestamo`, `cuotas`, `monto_cuota`, `saldo_pendiente`, `estado`) VALUES
 (1, 1, 30000, 6, 5000, 30000, 1),
-(2, 2, 49000, 6, 7000, 49000, 1),
+(2, 2, 42000, 6, 7000, 42000, 1),
 (3, 3, 25000, 6, 4166.67, 25000, 1),
 (4, 4, 100000, 6, 20000, 100000, 1),
 (5, 5, 6000, 6, 1000, 6000, 1),

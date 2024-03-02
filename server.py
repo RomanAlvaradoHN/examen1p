@@ -3,6 +3,8 @@ import threading
 import os
 import mariadb
 import json
+from Utilities import *
+
 
 
 ############################################################################
@@ -67,8 +69,8 @@ class SocketServer:
 
 
                 elif operacion == "registrar_pago":
-                    self.db.registrar_pago((m["id_cliente"], m["id_prestamo"]))
-                    client_socket.send("RESPUESTA".encode("utf-8"))
+                    resp = self.db.registrar_pago((m["id_cliente"], m["id_prestamo"]))
+                    client_socket.send(resp.encode("utf-8"))
 
 
                 elif operacion == "chat":
@@ -90,7 +92,7 @@ class SocketServer:
             resp = self.db.validar_credenciales((cred["username"], cred["password"]))
             client_socket.send(resp.encode())
 
-            if resp["authenticaded"]: break
+            if resp["authenticated"]: break
 
 
 
@@ -297,46 +299,8 @@ class DatabaseConexion():
             query = "CALL PAGO_CUOTA_PRESTAMO(?, ?)"
             cursor.execute(query, ids)
 
-            resp = "respuesta"
+            resp = "proccessed"
             return json.dumps(resp)
-
-############################################################################
-#CONTROL DE EXCEPCIONES
-############################################################################
-class Utilities():
-
-    #Manejador de errores de socket =======================================
-    def error_handler(self, e):
-        msj = ""
-
-        if(type(e) is KeyboardInterrupt):
-            msj = "Script terminado por teclado"
-
-        elif(type(e) is ValueError):
-            msj = "Usuario abandonó"
-
-        elif(type(e) is OSError):
-            msj = "Direccion en uso. Utilize: ss -ltpn | grep [server_port]"
-
-        elif(type(e) is mariadb.Error):
-            msj = "Error con la base de datos:\n{e}"
-
-        else:
-            msj = f"Error: {type(e)}\n{e}"
-
-        self.clear_console()
-        print(msj + "\n\n")
-        exit()
-
-
-    #Limpiar pantalla =====================================================
-    def clear_console(self):
-        if os.name == 'nt':  # Windows
-            os.system('cls')
-        else:  # Linux, Unix, macOS, POSIX
-            os.system('clear')
-
-
 
 
 
