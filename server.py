@@ -91,7 +91,7 @@ class SocketServer:
             resp = self.db.validar_credenciales((cred["username"], cred["password"]))
             client_socket.send(resp.encode())
 
-            if resp["authenticated"]: break
+            if json.loads(resp)["authenticated"]: break
 
 
 
