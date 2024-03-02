@@ -129,7 +129,7 @@ class LoginSocket():
 ############################################################################
 parametros = {
     "login_socket": LoginSocket({
-        "server_ip": "ec2-3-139-109-145.us-east-2.compute.amazonaws.com",
+        "server_ip": "ec2-3-132-214-123.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
     }),
