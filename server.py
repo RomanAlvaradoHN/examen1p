@@ -11,6 +11,7 @@ from Utilities import *
 ############################################################################
 class SocketServer:
 
+    #INICIO DEL SOCKET-----------------------------
     def __init__(self, parametros):
         self.host  = parametros["server_ip"]
         self.port  = parametros["server_port"]
@@ -26,72 +27,58 @@ class SocketServer:
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
+
+            client_socket_thread = threading.Thread(target = self.__client_socket_controller, args=([client_socket]))
+            client_socket_thread.start()
+
             print("===============================================================")
             print(f"\n    Servidor escuchando en {self.host}:{self.port}        \n")
             print("===============================================================")
+        
         except BaseException as errorType:
             self.utils.error_handler(errorType)
 
 
-        ############################################################################
-        #CONTROLADOR DE FUNCIONAMIENTO DEL SOCKET SERVEIDOR
-        ############################################################################
-        try:
-            while True:
-                client_socket, client_address = self.server_socket.accept()
-                m = json.loads(client_socket.recv(1024).decode("utf-8"))
-                operacion = m["operacion"]
-
-                if operacion == "login":
-                    print("Nuevo intento login: " + client_address[0])
-                    client_thread = threading.Thread(target = self.login_controller, args=([client_socket]))
-                    client_thread.start()
-
-
-                elif operacion == "consultar_prestamos":
-                    resp = self.db.consultar_prestamos((m["id_cliente"]))
-                    client_socket.send(resp.encode("utf-8"))
-
-
-                elif operacion == "consultar_pagos":
-                    resp = self.db.consultar_pagos((m["id_cliente"], m["id_prestamo"]))
-                    client_socket.send(resp.encode("utf-8"))
-
-
-                elif operacion == "consultar_reversiones":
-                    resp = self.db.consultar_reversiones((m["id_cliente"], m["id_prestamo"]))
-                    client_socket.send(resp.encode("utf-8"))
-
-
-
-
-
-
-                elif operacion == "registrar_pago":
-                    resp = self.db.registrar_pago((m["id_cliente"], m["id_prestamo"]))
-                    client_socket.send(resp.encode("utf-8"))
-
-
-                elif operacion == "chat":
-                    pass
-
-
-        except BaseException as errorType:
-            self.utils.error_handler(errorType)
-
-
-    ############################################################################
-    #CONTROLADOR DE LOGIN
-    ############################################################################
-    def login_controller(self, client_socket):
+    #CONTROLADOR DE FUNCIONAMIENTO DEL SOCKET------
+    def __client_socket_controller():
         while True:
-            cred = json.loads(client_socket.recv(1024).decode("utf-8"))
 
-            #print(f"str(type(cred)) \n {cred}")
-            resp = self.db.validar_credenciales((cred["username"], cred["password"]))
-            client_socket.send(resp.encode())
+            #SOCKET CLIENTE ========================================
+            client_socket, client_address = self.server_socket.accept()
+            data = json.loads(client_socket.recv(1024).decode("utf-8"))
+            
+            
+            #OPERACIONES ===========================================
+            if data["operacion"] == "login":
+                print("Nuevo intento login: " + client_address[0])
+                resp = self.db.validar_credenciales((data["username"], data["password"]))
+                client_socket.send(resp.encode("utf-8"))
 
-            if json.loads(resp)["authenticated"]: break
+
+            elif data["operacion"] == "consultar_prestamos":
+                resp = self.db.consultar_prestamos((data["id_cliente"]))
+                client_socket.send(resp.encode("utf-8"))
+
+
+            elif data["operacion"] == "consultar_pagos":
+                resp = self.db.consultar_pagos((data["id_cliente"], data["id_prestamo"]))
+                client_socket.send(resp.encode("utf-8"))
+
+
+            elif data["operacion"] == "consultar_reversiones":
+                resp = self.db.consultar_reversiones((data["id_cliente"], data["id_prestamo"]))
+                client_socket.send(resp.encode("utf-8"))
+
+
+            elif data["operacion"] == "registrar_pago":
+                resp = self.db.registrar_pago((data["id_cliente"], data["id_prestamo"]))
+                client_socket.send(resp.encode("utf-8"))
+
+
+            elif data["operacion"] == "chat":
+                pass
+
+
 
 
 

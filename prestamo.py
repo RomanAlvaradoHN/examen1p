@@ -12,10 +12,10 @@ class Prestamo():
 
 
     def mostrar_ventana():
-        ventana = tk.Tk()
-        ventana.title("Tabla de Préstamos")
+        self.pprestamo = tk.Tk()
+        self.pprestamo.title("Tabla de Préstamos")
 
-        tabla = ttk.Treeview(ventana)
+        tabla = ttk.Treeview(self.pprestamo)
         tabla["columns"] = ("Id", "IdCliente", "MontoPrestamo", "Cuotas", "MontoCuota", "Estado")
         tabla.heading("#0", text="ID Préstamo")
         tabla.heading("Id", text="ID Préstamo")
@@ -30,4 +30,14 @@ class Prestamo():
 
         tabla.pack()
 
-        ventana.mainloop()
+        self.pprestamo.mainloop()
+
+
+
+    def get_prestamos_cliente():
+        self.sockt.send(
+            json.dumps({
+                "operacion": "consultar_prestamos",
+                "id_cliente": usuario["id_cliente"]
+            })
+        )

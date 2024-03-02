@@ -57,6 +57,7 @@ class Ventana():
     def validar_credenciales(self):
         self.sockt.send(
             json.dumps({
+                "operacion": "login",
                 "username": self.entry_username.get(),
                 "password": self.entry_password.get()
             })
@@ -84,7 +85,7 @@ class Ventana():
 ############################################################################
 #SOCKET CLIENTE
 ############################################################################
-class LoginSocket():
+class SocketClient():
     def __init__(self, parametros):
         self.server_response = json.dumps("")
         self.utils = parametros["utils"]
@@ -96,13 +97,16 @@ class LoginSocket():
             self.utils.clear_console()
             self.sockt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.sockt.connect((parametros["server_ip"], parametros["server_port"]))
+            
+            #Nuevo hilo para escuchar al servidor-----------------
+            receive_thread = threading.Thread(target=self.receive)
+            receive_thread.start()            
+            
             print("===============================================================")
             print(f"\nSocket Cliente Establecido:\nhost: {parametros["server_ip"]}\nport: {parametros["server_port"]}\n")
             print("===============================================================")
 
-            #Nuevo hilo para escuchar al servidor-----------------
-            receive_thread = threading.Thread(target=self.receive)
-            receive_thread.start()
+            
 
         except BaseException as errorType: 
             self.utils.error_handler(errorType)
@@ -121,8 +125,6 @@ class LoginSocket():
     #RECEPCION DE MENSAJES DEL SOCKET SERVIDOR
     ############################################################################
     def receive(self):
-        self.send(json.dumps({"operacion": "login"}))  #<-- intento de login
-
         while True:
             #respuesta se recibe como un JSON
             self.server_response = self.sockt.recv(1024).decode("utf-8")
@@ -137,7 +139,7 @@ class LoginSocket():
 #BLOQUE DE INICIO DE SCRIPT LOGIN.PY
 ############################################################################
 parametros = {
-    "sockt": LoginSocket({
+    "sockt": SocketClient({
         "server_ip": "ec2-3-132-214-123.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
