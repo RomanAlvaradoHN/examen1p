@@ -1,3 +1,6 @@
+import os
+
+
 ############################################################################
 #CONTROL DE EXCEPCIONES
 ############################################################################
@@ -19,8 +22,8 @@ class Utilities():
         elif(type(e) is ConnectionRefusedError):
             msj = "Conexion rechazada. Valide que el servidor este activo y a la escucha"
 
-        elif(type(e) is mariadb.Error):
-            msj = "Error con la base de datos:\n{e}"
+        #elif(type(e) is mariadb.Error):
+        #    msj = "Error con la base de datos:\n{e}"
 
         else:
             msj = f"Error: {type(e)}\n{e}"

@@ -81,7 +81,7 @@ class LoginSocket():
         #PUESTA EN MARCHA DEL SOCKET CLIENTE
         ############################################################################
         try:
-            self.utils.limpiarConsola()
+            self.utils.clear_console()
             self.login_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.login_socket.connect((parametros["server_ip"], parametros["server_port"]))
             print("===============================================================")
