@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import messagebox
 import subprocess
 import json
+from Utilities import *
 
 
 ############################################################################
@@ -128,56 +129,11 @@ class LoginSocket():
 
 
 ############################################################################
-#CONTROL DE EXCEPCIONES
-############################################################################
-class Utilities():
-
-    #Manejador de errores de socket =======================================
-    def error_handler(self, e):
-        msj = ""
-
-        if(type(e) is KeyboardInterrupt):
-            msj = "Script terminado por teclado"
-
-        elif(type(e) is ValueError):
-            msj = "Usuario abandonó"
-
-        elif(type(e) is OSError):
-            msj = "Direccion en uso. Utilize: ss -ltpn | grep [server_port]"
-
-        elif(type(e) is ConnectionRefusedError):
-            msj = "Conexion rechazada. Valide que el servidor este activo y a la escucha"
-
-        else:    
-            msj = f"Error: {type(e)}\n{e}"
-
-        self.limpiarConsola()
-        print(msj + "\n\n")
-        exit()
-
-
-
-    #Limpiar pantalla =====================================================
-    def limpiarConsola(self):
-        if os.name == 'nt':  # Windows
-            os.system('cls')
-        else:  # Linux, Unix, macOS
-            os.system('clear')
-
-
-
-
-
-
-
-
-
-############################################################################
 #BLOQUE DE INICIO DE SCRIPT LOGIN.PY
 ############################################################################
 parametros = {
     "login_socket": LoginSocket({
-        "server_ip": "ec2-3-139-109-145.us-east-2.compute.amazonaws.com",
+        "server_ip": "ec2-3-132-214-123.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
     }),
