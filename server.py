@@ -28,7 +28,7 @@ class SocketServer:
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
 
-            client_socket_thread = threading.Thread(target = self.__client_socket_controller, args=([client_socket]))
+            client_socket_thread = threading.Thread(target = self.__client_socket_controller)
             client_socket_thread.start()
 
             print("===============================================================")
@@ -40,7 +40,7 @@ class SocketServer:
 
 
     #CONTROLADOR DE FUNCIONAMIENTO DEL SOCKET------
-    def __client_socket_controller():
+    def __client_socket_controller(self):
         while True:
 
             #SOCKET CLIENTE ========================================

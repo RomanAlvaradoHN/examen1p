@@ -60,21 +60,27 @@ class Ventana():
                 "operacion": "login",
                 "username": self.entry_username.get(),
                 "password": self.entry_password.get()
-            })
+            })            
         )
+
+        print(self.sockt.server_response)
         
-        #se convierte el JSON a un Dict (diccionario)
-        resp = json.loads(self.sockt.server_response)
+        """
+        if not self.sockt.server_response:
+            print("nada")
+        else:
+            resp = json.loads(self.sockt.server_response.decode("utf-8"))
 
-        if "authenticated" in resp:
-            if resp["authenticated"]:
-                self.plogin.destroy()
-                pmenu = Menu(self.sockt, resp)
-                pmenu.mostrar_ventana()
+            if "authenticated" in resp:
+                if resp["authenticated"]:
+                    self.plogin.destroy()
+                    pmenu = Menu(self.sockt, resp)
+                    pmenu.mostrar_ventana()
 
-            else:
-                messagebox.showwarning("Login:", "Credenciales no validas")
+                else:
+                    messagebox.showwarning("Login:", "Credenciales no validas")
 
+   """
 
 
 
@@ -87,7 +93,7 @@ class Ventana():
 ############################################################################
 class SocketClient():
     def __init__(self, parametros):
-        self.server_response = json.dumps("")
+        self.server_response = None
         self.utils = parametros["utils"]
 
         ############################################################################
@@ -105,8 +111,6 @@ class SocketClient():
             print("===============================================================")
             print(f"\nSocket Cliente Establecido:\nhost: {parametros["server_ip"]}\nport: {parametros["server_port"]}\n")
             print("===============================================================")
-
-            
 
         except BaseException as errorType: 
             self.utils.error_handler(errorType)
@@ -127,7 +131,7 @@ class SocketClient():
     def receive(self):
         while True:
             #respuesta se recibe como un JSON
-            self.server_response = self.sockt.recv(1024).decode("utf-8")
+            self.server_response = self.sockt.recv(1024)
             #print(str(type(self.server_response)))
 
 
