@@ -40,7 +40,7 @@ class SocketServer:
             while True:
                 client_socket, client_address = self.server_socket.accept()
                 m = json.loads(client_socket.recv(1024).decode("utf-8"))
-                operacion = m["oper"]
+                operacion = m["operacion"]
 
                 if operacion == "login":
                     print("Nuevo intento login: " + client_address[0])

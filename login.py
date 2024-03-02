@@ -1,34 +1,33 @@
 import socket
 import threading
-import os
 import tkinter as tk
 from tkinter import messagebox
-import subprocess
 import json
 from Utilities import *
+from menu import *
 
 ############################################################################
 #CONSTRUCCION DE LA VENTANA
 ############################################################################
 class Ventana():
     def __init__(self, parametros):
-        self.login_socket   = parametros["login_socket"]
-        self.utils  = parametros["utils"]
-        root        = tk.Tk()
+        self.sockt = parametros["sockt"]
+        self.utils = parametros["utils"]
+        self.plogin = tk.Tk()
         
-        root.title("Login")
+        self.plogin.title("Login")
         colorFondo = "white"
-        root.configure(bg=colorFondo)
+        self.plogin.configure(bg=colorFondo)
 
-        ancho_ventana = root.winfo_screenwidth() // 2
-        alto_ventana = root.winfo_screenheight() // 2
-        posicion_x = (root.winfo_screenwidth() - ancho_ventana) // 2
-        posicion_y = (root.winfo_screenheight() - alto_ventana) // 2
-        root.geometry(f"{ancho_ventana}x{alto_ventana}+{posicion_x}+{posicion_y}")
+        ancho_ventana = self.plogin.winfo_screenwidth() // 2
+        alto_ventana = self.plogin.winfo_screenheight() // 2
+        posicion_x = (self.plogin.winfo_screenwidth() - ancho_ventana) // 2
+        posicion_y = (self.plogin.winfo_screenheight() - alto_ventana) // 2
+        self.plogin.geometry(f"{ancho_ventana}x{alto_ventana}+{posicion_x}+{posicion_y}")
 
         try:
             imagen_logo = tk.PhotoImage(file="logo.png")
-            label_logo = tk.Label(root, image=imagen_logo, bg=colorFondo)
+            label_logo = tk.Label(self.plogin, image=imagen_logo, bg=colorFondo)
             label_logo.pack(pady=20)
         except tk.TclError:
             print("No se pudo cargar el logo.")
@@ -36,32 +35,44 @@ class Ventana():
 
         fuente = ("Arial Black", 12)
 
-        label_username = tk.Label(root, text="Usuario:", font=fuente, bg=colorFondo)
+        label_username = tk.Label(self.plogin, text="Usuario:", font=fuente, bg=colorFondo)
         label_username.pack()
-        self.entry_username = tk.Entry(root, font=fuente)
+        self.entry_username = tk.Entry(self.plogin, font=fuente)
         self.entry_username.pack()
 
-        label_password = tk.Label(root, text="Contraseña:", font=fuente , bg=colorFondo)
+        label_password = tk.Label(self.plogin, text="Contraseña:", font=fuente , bg=colorFondo)
         label_password.pack()
-        self.entry_password = tk.Entry(root, show="*", font=fuente)
+        self.entry_password = tk.Entry(self.plogin, show="*", font=fuente)
         self.entry_password.pack()
 
-        boton_ingresar = tk.Button(root, text="Ingresar", command=self.validar_credenciales, font=fuente, bg='limegreen', fg='white', bd=0)
+        boton_ingresar = tk.Button(self.plogin, text="Ingresar", command=self.validar_credenciales, font=fuente, bg='limegreen', fg='white', bd=0)
         boton_ingresar.pack(pady=10)
 
-        root.mainloop()
+        self.plogin.mainloop()
 
     
     ############################################################################
     #ACCION DE BOTON LOGIN
     ############################################################################
     def validar_credenciales(self):
-        self.login_socket.send(
+        self.sockt.send(
             json.dumps({
                 "username": self.entry_username.get(),
                 "password": self.entry_password.get()
             })
         )
+        
+        #se convierte el JSON a un Dict (diccionario)
+        resp = json.loads(self.sockt.server_response)
+
+        if "authenticated" in resp:
+            if resp["authenticated"]:
+                self.plogin.destroy()
+                pmenu = Menu(self.sockt, resp)
+                pmenu.mostrar_ventana()
+
+            else:
+                messagebox.showwarning("Login:", "Credenciales no validas")
 
 
 
@@ -75,6 +86,7 @@ class Ventana():
 ############################################################################
 class LoginSocket():
     def __init__(self, parametros):
+        self.server_response = json.dumps("")
         self.utils = parametros["utils"]
 
         ############################################################################
@@ -82,16 +94,15 @@ class LoginSocket():
         ############################################################################
         try:
             self.utils.clear_console()
-            self.login_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
-            self.login_socket.connect((parametros["server_ip"], parametros["server_port"]))
+            self.sockt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+            self.sockt.connect((parametros["server_ip"], parametros["server_port"]))
             print("===============================================================")
             print(f"\nSocket Cliente Establecido:\nhost: {parametros["server_ip"]}\nport: {parametros["server_port"]}\n")
             print("===============================================================")
 
+            #Nuevo hilo para escuchar al servidor-----------------
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()
-
-            self.send(json.dumps({"oper": "login"}))
 
         except BaseException as errorType: 
             self.utils.error_handler(errorType)
@@ -102,22 +113,20 @@ class LoginSocket():
     #ENVIO DE MENSAJES A SOCKET SERVIDOR
     ############################################################################
     def send(self, message):
-        self.login_socket.send(message.encode("utf-8"))
+        self.sockt.send(message.encode("utf-8"))
 
 
-    
     
     ############################################################################
     #RECEPCION DE MENSAJES DEL SOCKET SERVIDOR
     ############################################################################
     def receive(self):
-        while True:
-            data = self.login_socket.recv(1024).decode("utf-8")
+        self.send(json.dumps({"operacion": "login"}))  #<-- intento de login
 
-            if json.loads(data)["authenticated"]:
-                subprocess.run(["python", "menu.py", str(data)])
-            else:
-                messagebox.showwarning("Login:", "Credenciales no validas")
+        while True:
+            #respuesta se recibe como un JSON
+            self.server_response = self.sockt.recv(1024).decode("utf-8")
+            #print(str(type(self.server_response)))
 
 
 
@@ -128,7 +137,7 @@ class LoginSocket():
 #BLOQUE DE INICIO DE SCRIPT LOGIN.PY
 ############################################################################
 parametros = {
-    "login_socket": LoginSocket({
+    "sockt": LoginSocket({
         "server_ip": "ec2-3-132-214-123.us-east-2.compute.amazonaws.com",
         "server_port": 9999,
         "utils": Utilities()
