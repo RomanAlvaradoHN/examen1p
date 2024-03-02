@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Mar 02, 2024 at 02:16 AM
+-- Generation Time: Mar 02, 2024 at 02:23 AM
 -- Server version: 11.3.2-MariaDB-1:11.3.2+maria~deb12
 -- PHP Version: 8.2.7
 
@@ -48,6 +48,7 @@ END$$
 
 CREATE DEFINER=`admin`@`%` PROCEDURE `PAGO_CUOTA_PRESTAMO` (IN `p_id_cliente` INT, IN `p_id_prestamo` INT)   BEGIN
     CALL PAGAR_SIGUIENTE_CUOTA(p_id_cliente, p_id_prestamo);
+    CALL ACTUALIZAR_SALDO(p_id_cliente, p_id_prestamo);
     COMMIT;
 END$$
 
