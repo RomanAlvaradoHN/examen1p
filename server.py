@@ -14,7 +14,7 @@ class ServerSocket:
     def __init__(self, params):
         host = params["server_ip"]
         port = params["server_port"]
-        self.db = p["database_conexion"]
+        self.db = params["database_conexion"]
         self.utils = Utilities()
 
         ############################################################################
