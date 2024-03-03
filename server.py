@@ -11,11 +11,9 @@ from Utilities import *
 class ServerSocket:
 
     #INICIO DEL SOCKET-----------------------------
-    def __init__(self, parametros):
-        self.host  = parametros["server_ip"]
-        self.port  = parametros["server_port"]
-        self.db    = parametros["database_conexion"]
-        self.utils = parametros["utilities"]
+    def __init__(self, p):
+        self.db = p["database_conexion"]
+        self.utils = Utilities()
 
         ############################################################################
         #PUESTA EN MARCHA DEL SOCKET SERVIDOR
@@ -24,16 +22,16 @@ class ServerSocket:
             self.utils.clear_console()
             self.clients = []
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server_socket.bind((self.host, self.port))
+            self.server_socket.bind((p["server_ip"], p["server_port"]))
             self.server_socket.listen(5)
 
             #Hilo para recibir los nuevos sockets cliente---------------------------
             client_socket_thread = threading.Thread(target = self.__new_client_socket_controller)
             client_socket_thread.start()
 
-            print("===============================================================")
-            print(f"\n    Servidor escuchando en {self.host}:{self.port}        \n")
-            print("===============================================================")
+            print("====================================================================")
+            print(f"\n    Servidor escuchando en {p["server_ip"]}:{p["server_port"]} \n")
+            print("====================================================================")
         
         except BaseException as errorType:
             self.utils.error_handler(errorType)
@@ -300,8 +298,7 @@ if __name__ == "__main__":
     parametros = {
         "server_ip": '172.31.30.203',
         "server_port": 9999,
-        "database_conexion": DatabaseConexion(),
-        "utilities": Utilities()
+        "database_conexion": DatabaseConexion()
     }
 
     server = ServerSocket(parametros)

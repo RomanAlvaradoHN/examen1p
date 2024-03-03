@@ -10,8 +10,8 @@ from menu import *
 #CONSTRUCCION DE LA VENTANA
 ############################################################################
 class Ventana():
-    def __init__(self, parametros):
-        self.sockt = parametros["sockt"]
+    def __init__(self, p):
+        self.sockt = p["sockt"]
         
         self.plogin = tk.Tk()
         self.plogin.title("Login")
@@ -62,24 +62,22 @@ class Ventana():
             })            
         )
 
-        print(self.sockt.server_response)
-        
-        """
-        if not self.sockt.server_response:
-            print("nada")
-        else:
-            resp = json.loads(self.sockt.server_response.decode("utf-8"))
+        while True:
+            if not self.sockt.server_response:
+                pass
+            
+            else:
+                resp = json.loads(self.sockt.server_response)
 
-            if "authenticated" in resp:
-                if resp["authenticated"]:
-                    self.plogin.destroy()
-                    pmenu = Menu(self.sockt, resp)
-                    pmenu.mostrar_ventana()
+                if "authenticated" in resp:
+                    if resp["authenticated"]:
+                        self.plogin.destroy()
+                        pmenu = Menu(self.sockt, resp)
+                        pmenu.mostrar_ventana()
 
-                else:
-                    messagebox.showwarning("Login:", "Credenciales no validas")
+                    else:
+                        messagebox.showwarning("Login:", "Credenciales no validas")
 
-   """
 
 
 
@@ -91,14 +89,16 @@ class Ventana():
 #SOCKET CLIENTE
 ############################################################################
 class ClientSocket():
-    def __init__(self, parametros):
+    def __init__(self, p):
+        self.utils = Utilities()
+
         ############################################################################
         #PUESTA EN MARCHA DEL SOCKET CLIENTE
         ############################################################################
         try:
-            clear_console()
+            self.utils.clear_console()
             self.sockt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
-            self.sockt.connect((parametros["server_ip"], parametros["server_port"]))
+            self.sockt.connect((p["server_ip"], p["server_port"]))
             
             #Nuevo hilo para escuchar al servidor-----------------
             receive_thread = threading.Thread(target=self.receive)
@@ -109,7 +109,7 @@ class ClientSocket():
             print("===============================================================")
 
         except BaseException as errorType: 
-            error_handler(errorType)
+            self.utils.error_handler(errorType)
             self.server_socket.close()
 
 
@@ -127,7 +127,7 @@ class ClientSocket():
     def receive(self):
         while True:
             #respuesta se recibe como un JSON
-            self.server_response = self.sockt.recv(1024)
+            self.server_response = self.sockt.recv(1024).decode("utf-8")
             #print(str(type(self.server_response)))
 
 
@@ -139,8 +139,8 @@ class ClientSocket():
 #BLOQUE DE INICIO DE SCRIPT LOGIN.PY
 ############################################################################
 parametros = {
-    "sockt": SocketClient({
-        "server_ip": "ec2-3-132-214-123.us-east-2.compute.amazonaws.com",
+    "sockt": ClientSocket({
+        "server_ip": "ec2-3-139-91-226.us-east-2.compute.amazonaws.com",
         "server_port": 9999
     })
 }
