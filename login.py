@@ -12,9 +12,8 @@ from menu import *
 class Ventana():
     def __init__(self, parametros):
         self.sockt = parametros["sockt"]
-        self.utils = parametros["utils"]
-        self.plogin = tk.Tk()
         
+        self.plogin = tk.Tk()
         self.plogin.title("Login")
         colorFondo = "white"
         self.plogin.configure(bg=colorFondo)
@@ -91,16 +90,13 @@ class Ventana():
 ############################################################################
 #SOCKET CLIENTE
 ############################################################################
-class SocketClient():
+class ClientSocket():
     def __init__(self, parametros):
-        self.server_response = None
-        self.utils = parametros["utils"]
-
         ############################################################################
         #PUESTA EN MARCHA DEL SOCKET CLIENTE
         ############################################################################
         try:
-            self.utils.clear_console()
+            clear_console()
             self.sockt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.sockt.connect((parametros["server_ip"], parametros["server_port"]))
             
@@ -113,7 +109,7 @@ class SocketClient():
             print("===============================================================")
 
         except BaseException as errorType: 
-            self.utils.error_handler(errorType)
+            error_handler(errorType)
             self.server_socket.close()
 
 
@@ -145,10 +141,8 @@ class SocketClient():
 parametros = {
     "sockt": SocketClient({
         "server_ip": "ec2-3-132-214-123.us-east-2.compute.amazonaws.com",
-        "server_port": 9999,
-        "utils": Utilities()
-    }),
-    "utils": Utilities()
+        "server_port": 9999
+    })
 }
 
 login = Ventana(parametros)

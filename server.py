@@ -1,6 +1,5 @@
 import socket
 import threading
-import os
 import mariadb
 import json
 from Utilities import *
@@ -9,7 +8,7 @@ from Utilities import *
 ############################################################################
 #SOCKET SERVER
 ############################################################################
-class SocketServer:
+class ServerSocket:
 
     #INICIO DEL SOCKET-----------------------------
     def __init__(self, parametros):
@@ -28,7 +27,8 @@ class SocketServer:
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(5)
 
-            client_socket_thread = threading.Thread(target = self.__client_socket_controller)
+            #Hilo para recibir los nuevos sockets cliente---------------------------
+            client_socket_thread = threading.Thread(target = self.__new_client_socket_controller)
             client_socket_thread.start()
 
             print("===============================================================")
@@ -40,7 +40,7 @@ class SocketServer:
 
 
     #CONTROLADOR DE FUNCIONAMIENTO DEL SOCKET------
-    def __client_socket_controller(self):
+    def __new_client_socket_controller(self):
         while True:
 
             #SOCKET CLIENTE ========================================
@@ -304,4 +304,4 @@ if __name__ == "__main__":
         "utilities": Utilities()
     }
 
-    server = SocketServer(parametros)
+    server = ServerSocket(parametros)
