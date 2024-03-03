@@ -89,7 +89,9 @@ class Ventana():
 #SOCKET CLIENTE
 ############################################################################
 class ClientSocket():
-    def __init__(self, p):
+    def __init__(self, params):
+        server_ip = params["serve_ip"]
+        server_port = params["server_port"]
         self.utils = Utilities()
 
         ############################################################################
@@ -98,14 +100,14 @@ class ClientSocket():
         try:
             self.utils.clear_console()
             self.sockt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
-            self.sockt.connect((p["server_ip"], p["server_port"]))
+            self.sockt.connect((server_ip, server_port))
             
             #Nuevo hilo para escuchar al servidor-----------------
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()            
             
             print("===============================================================")
-            print(f"\nSocket Cliente Establecido:\nhost: {parametros["server_ip"]}\nport: {parametros["server_port"]}\n")
+            print(f"\nSocket Cliente Establecido:\nhost: {server_ip}\nport: {server_port}\n")
             print("===============================================================")
 
         except BaseException as errorType: 
