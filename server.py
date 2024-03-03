@@ -11,7 +11,9 @@ from Utilities import *
 class ServerSocket:
 
     #INICIO DEL SOCKET-----------------------------
-    def __init__(self, p):
+    def __init__(self, params):
+        host = params["server_ip"]
+        port = params["server_port"]
         self.db = p["database_conexion"]
         self.utils = Utilities()
 
@@ -22,7 +24,7 @@ class ServerSocket:
             self.utils.clear_console()
             self.clients = []
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server_socket.bind((p["server_ip"], p["server_port"]))
+            self.server_socket.bind((host, port))
             self.server_socket.listen(5)
 
             #Hilo para recibir los nuevos sockets cliente---------------------------
@@ -30,7 +32,7 @@ class ServerSocket:
             client_socket_thread.start()
 
             print("====================================================================")
-            print(f"\n    Servidor escuchando en {p["server_ip"]}:{p["server_port"]} \n")
+            print(f"\n    Servidor escuchando en {host}:{port} \n")
             print("====================================================================")
         
         except BaseException as errorType:
