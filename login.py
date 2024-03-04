@@ -10,8 +10,8 @@ from menu import *
 #CONSTRUCCION DE LA VENTANA
 ############################################################################
 class Ventana():
-    def __init__(self, p):
-        self.sockt = p["sockt"]
+    def __init__(self, params):
+        self.sockt = params["sockt"]
         
         self.plogin = tk.Tk()
         self.plogin.title("Login")
@@ -63,20 +63,20 @@ class Ventana():
         )
 
         while True:
-            if not self.sockt.server_response:
-                pass
-            
+            if not self.sockt.server_response: pass
             else:
                 resp = json.loads(self.sockt.server_response)
+                print(resp)
 
                 if "authenticated" in resp:
-                    if resp["authenticated"]:
+                    if resp["authenticated"] == True:
                         self.plogin.destroy()
                         pmenu = Menu(self.sockt, resp)
                         pmenu.mostrar_ventana()
 
                     else:
                         messagebox.showwarning("Login:", "Credenciales no validas")
+                        break
 
 
 
@@ -90,7 +90,7 @@ class Ventana():
 ############################################################################
 class ClientSocket():
     def __init__(self, params):
-        server_ip = params["serve_ip"]
+        server_ip = params["server_ip"]
         server_port = params["server_port"]
         self.utils = Utilities()
 
@@ -102,7 +102,8 @@ class ClientSocket():
             self.sockt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.sockt.connect((server_ip, server_port))
             
-            #Nuevo hilo para escuchar al servidor-----------------
+            #Nuevo hilo para escuchar al servidor-------------------------
+            self.server_response = None
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()            
             
@@ -130,7 +131,6 @@ class ClientSocket():
         while True:
             #respuesta se recibe como un JSON
             self.server_response = self.sockt.recv(1024).decode("utf-8")
-            #print(str(type(self.server_response)))
 
 
 

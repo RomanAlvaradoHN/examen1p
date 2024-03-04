@@ -10,7 +10,7 @@ from Utilities import *
 ############################################################################
 class ServerSocket:
 
-    #INICIO DEL SOCKET-----------------------------
+    #INICIO DEL SOCKET----------------------------------------------------
     def __init__(self, params):
         host = params["server_ip"]
         port = params["server_port"]
@@ -28,7 +28,7 @@ class ServerSocket:
             self.server_socket.listen(5)
 
             #Hilo para recibir los nuevos sockets cliente---------------------------
-            client_socket_thread = threading.Thread(target = self.__new_client_socket_controller)
+            client_socket_thread = threading.Thread(target = self.__client_sockets_listener)
             client_socket_thread.start()
 
             print("====================================================================")
@@ -39,16 +39,25 @@ class ServerSocket:
             self.utils.error_handler(errorType)
 
 
-    #CONTROLADOR DE FUNCIONAMIENTO DEL SOCKET------
-    def __new_client_socket_controller(self):
+    
+    
+    
+    #CONTROLADOR DE NUEVOS SOCKET CLIENTE --------------------------------
+    def __client_sockets_listener(self):
         while True:
-
-            #SOCKET CLIENTE ========================================
             client_socket, client_address = self.server_socket.accept()
+
+            #Hilo para comunicacion de cada sockets cliente---------------
+            client_operations_thread = threading.Thread(target = self.__operation_controller, args=[client_socket])
+            client_operations_thread.start()
+            
+
+    #ORQUESTADOR DE OPERACIONES ------------------------------------------
+    def __operation_controller(self, sockt):
+        while True:
             data = json.loads(client_socket.recv(1024).decode("utf-8"))
-            
-            
-            #OPERACIONES ===========================================
+
+            #OPERACIONES -----------------------------------------------------
             if data["operacion"] == "login":
                 print("Nuevo intento login: " + client_address[0])
                 resp = self.db.validar_credenciales((data["username"], data["password"]))
@@ -79,10 +88,14 @@ class ServerSocket:
                 pass
 
 
-
-
-
-
+    
+    
+    
+    
+    
+    
+    
+    
     ############################################################################
     #CONTROLADOR DE CHAT
     ############################################################################
