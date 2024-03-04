@@ -53,7 +53,7 @@ class ServerSocket:
             
 
     #ORQUESTADOR DE OPERACIONES ------------------------------------------
-    def __operation_controller(self, sockt):
+    def __operation_controller(self, client_socket):
         while True:
             data = json.loads(client_socket.recv(1024).decode("utf-8"))
 
