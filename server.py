@@ -71,27 +71,27 @@ class ServerSocket:
                     else:
                         print(f"login from {client_address[0]} successful")
 
-                    client_socket.send(resp.encode("utf-8"))
+                    client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
                 elif data["operacion"] == "consultar_prestamos":
                     resp = self.db.consultar_prestamos((data["id_cliente"]))
-                    client_socket.send(resp.encode("utf-8"))
+                    client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
                 elif data["operacion"] == "consultar_pagos":
                     resp = self.db.consultar_pagos((data["id_cliente"], data["id_prestamo"]))
-                    client_socket.send(resp.encode("utf-8"))
+                    client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
                 elif data["operacion"] == "consultar_reversiones":
                     resp = self.db.consultar_reversiones((data["id_cliente"], data["id_prestamo"]))
-                    client_socket.send(resp.encode("utf-8"))
+                    client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
                 elif data["operacion"] == "registrar_pago":
                     resp = self.db.registrar_pago((data["id_cliente"], data["id_prestamo"]))
-                    client_socket.send(resp.encode("utf-8"))
+                    client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
                 elif data["operacion"] == "chat":
@@ -220,13 +220,13 @@ class DatabaseConexion():
         data = cursor.fetchone()
 
         if cursor.rowcount == 1:
-            return json.dumps({
+            return {
                 "authenticated": True,
                 "id_cliente": data[0],
                 "nombre": data[1]
-            })
+            }
 
-        else: return json.dumps({"authenticated": False})
+        else: return {"authenticated": False}
 
 
 
@@ -252,7 +252,7 @@ class DatabaseConexion():
                 "estado": estado
             })
 
-        return json.dumps(resp)
+        return resp
 
 
     
@@ -278,7 +278,7 @@ class DatabaseConexion():
                 "estado": estado
             })
 
-        return json.dumps(resp)
+        return resp
 
 
 
@@ -301,7 +301,7 @@ class DatabaseConexion():
                 "id_cuota": id_cuota
             })
 
-        return json.dumps(resp)
+        return resp
 
 
 
@@ -312,7 +312,7 @@ class DatabaseConexion():
             cursor.execute(query, ids)
 
             resp = "proccessed"
-            return json.dumps(resp)
+            return resp
 
 
 
