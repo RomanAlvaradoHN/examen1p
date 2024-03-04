@@ -45,15 +45,17 @@ class ServerSocket:
     #CONTROLADOR DE NUEVOS SOCKET CLIENTE --------------------------------
     def __client_sockets_listener(self):
         while True:
-            client_socket, client_address = self.server_socket.accept()
+            new_socket = self.server_socket.accept()
 
             #Hilo para comunicacion de cada sockets cliente---------------
-            client_operations_thread = threading.Thread(target = self.__operation_controller, args=[client_socket])
+            client_operations_thread = threading.Thread(target = self.__operation_controller, args=[new_socket])
             client_operations_thread.start()
             
 
     #ORQUESTADOR DE OPERACIONES ------------------------------------------
-    def __operation_controller(self, client_socket):
+    def __operation_controller(self, new_socket):
+        client_socket, client_address = new_socket
+        
         while True:
             data = json.loads(client_socket.recv(1024).decode("utf-8"))
 
