@@ -10,16 +10,13 @@ from Utilities import *
 ############################################################################
 class ServerSocket:
 
-    #INICIO DEL SOCKET----------------------------------------------------
+    #PUESTA EN MARCHA DEL SOCKET SERVIDOR --------------------------------
     def __init__(self, params):
         host = params["server_ip"]
         port = params["server_port"]
         self.db = params["database_conexion"]
         self.utils = Utilities()
 
-        ############################################################################
-        #PUESTA EN MARCHA DEL SOCKET SERVIDOR
-        ############################################################################
         try:
             self.utils.clear_console()
             self.clients = []
@@ -40,19 +37,25 @@ class ServerSocket:
 
 
     
-    
-    
     #CONTROLADOR DE NUEVOS SOCKET CLIENTE --------------------------------
     def __client_sockets_listener(self):
-        while True:
-            new_socket = self.server_socket.accept()
+        try:
+            while True:
+                new_socket = self.server_socket.accept()
 
-            print(f"New client connection from {new_socket[1][0]}")
+                print(f"New client connection from {new_socket[1][0]}")
 
-            #Hilo para comunicacion de cada sockets cliente---------------
-            client_operations_thread = threading.Thread(target = self.__operation_controller, args=[new_socket])
-            client_operations_thread.start()
-            
+                #Hilo para comunicacion de cada sockets cliente---------------
+                client_operations_thread = threading.Thread(target = self.__operation_controller, args=[new_socket])
+                client_operations_thread.start()
+
+        except BaseException as errorType:
+            self.utils.error_handler(errorType)
+
+
+
+
+
 
     #ORQUESTADOR DE OPERACIONES ------------------------------------------
     def __operation_controller(self, new_socket):

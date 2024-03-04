@@ -50,9 +50,8 @@ class Ventana():
         self.plogin.mainloop()
 
     
-    ############################################################################
-    #ACCION DE BOTON LOGIN
-    ############################################################################
+
+    #ACCION DE BOTON LOGIN -----------------------------------------------
     def validar_credenciales(self):
         self.sockt.send(
             json.dumps({
@@ -88,21 +87,20 @@ class Ventana():
 #SOCKET CLIENTE
 ############################################################################
 class ClientSocket():
+    
+    #PUESTA EN MARCHA DEL SOCKET CLIENTE ---------------------------------
     def __init__(self, params):
         server_ip = params["server_ip"]
         server_port = params["server_port"]
         self.utils = Utilities()
+        self.server_response = None
 
-        ############################################################################
-        #PUESTA EN MARCHA DEL SOCKET CLIENTE
-        ############################################################################
         try:
             self.utils.clear_console()
             self.sockt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
             self.sockt.connect((server_ip, server_port))
             
             #Nuevo hilo para escuchar al servidor-------------------------
-            self.server_response = None
             receive_thread = threading.Thread(target=self.receive)
             receive_thread.start()            
             
@@ -114,18 +112,11 @@ class ClientSocket():
             self.utils.error_handler(errorType)
             self.server_socket.close()
 
-
-    ############################################################################
-    #ENVIO DE MENSAJES A SOCKET SERVIDOR
-    ############################################################################
+    #ENVIO DE MENSAJES A SOCKET SERVIDOR ---------------------------------
     def send(self, message):
         self.sockt.send(message.encode("utf-8"))
-
-
     
-    ############################################################################
-    #RECEPCION DE MENSAJES DEL SOCKET SERVIDOR
-    ############################################################################
+    #RECEPCION DE MENSAJES DEL SOCKET SERVIDOR ---------------------------
     def receive(self):
         while True:
             self.server_response = self.sockt.recv(1024).decode("utf-8")
