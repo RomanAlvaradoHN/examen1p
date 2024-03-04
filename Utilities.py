@@ -24,9 +24,9 @@ class Utilities():
 
         elif(type(e) is ConnectionResetError):
             msj = "Cliente desconectado"
-
-        #elif(type(e) is mariadb.Error):
-        #    msj = "Error con la base de datos:\n{e}"
+            
+        elif(type(e) is ModuleNotFoundError):
+            msj = "Error con la base de datos:\n{e}"
 
         else:
             msj = f"Error: {type(e)}\n{e}"

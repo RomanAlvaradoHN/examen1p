@@ -47,6 +47,8 @@ class ServerSocket:
         while True:
             new_socket = self.server_socket.accept()
 
+            print("New client connection")
+
             #Hilo para comunicacion de cada sockets cliente---------------
             client_operations_thread = threading.Thread(target = self.__operation_controller, args=[new_socket])
             client_operations_thread.start()
@@ -62,8 +64,11 @@ class ServerSocket:
 
                 #OPERACIONES -----------------------------------------------------
                 if data["operacion"] == "login":
-                    print("Nuevo intento login: " + client_address[0])
                     resp = self.db.validar_credenciales((data["username"], data["password"]))
+                    
+                    if resp["authenticated"]: print("login refused"  + client_address[0])
+                    else: print("login successful"  + client_address[0])
+
                     client_socket.send(resp.encode("utf-8"))
 
 
