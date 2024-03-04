@@ -66,8 +66,8 @@ class ServerSocket:
                 if data["operacion"] == "login":
                     resp = self.db.validar_credenciales((data["username"], data["password"]))
                     
-                    if resp["authenticated"]: print("login refused"  + client_address[0])
-                    else: print("login successful"  + client_address[0])
+                    if resp["authenticated"]: print("login refused"  + str(client_address[0]))
+                    else: print("login successful"  + str(client_address[0]))
 
                     client_socket.send(resp.encode("utf-8"))
 
