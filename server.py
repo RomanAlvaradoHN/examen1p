@@ -54,40 +54,44 @@ class ServerSocket:
 
     #ORQUESTADOR DE OPERACIONES ------------------------------------------
     def __operation_controller(self, new_socket):
-        client_socket, client_address = new_socket
-        
-        while True:
-            data = json.loads(client_socket.recv(1024).decode("utf-8"))
+        try:
+            client_socket, client_address = new_socket
 
-            #OPERACIONES -----------------------------------------------------
-            if data["operacion"] == "login":
-                print("Nuevo intento login: " + client_address[0])
-                resp = self.db.validar_credenciales((data["username"], data["password"]))
-                client_socket.send(resp.encode("utf-8"))
+            while True:
+                data = json.loads(client_socket.recv(1024).decode("utf-8"))
 
-
-            elif data["operacion"] == "consultar_prestamos":
-                resp = self.db.consultar_prestamos((data["id_cliente"]))
-                client_socket.send(resp.encode("utf-8"))
+                #OPERACIONES -----------------------------------------------------
+                if data["operacion"] == "login":
+                    print("Nuevo intento login: " + client_address[0])
+                    resp = self.db.validar_credenciales((data["username"], data["password"]))
+                    client_socket.send(resp.encode("utf-8"))
 
 
-            elif data["operacion"] == "consultar_pagos":
-                resp = self.db.consultar_pagos((data["id_cliente"], data["id_prestamo"]))
-                client_socket.send(resp.encode("utf-8"))
+                elif data["operacion"] == "consultar_prestamos":
+                    resp = self.db.consultar_prestamos((data["id_cliente"]))
+                    client_socket.send(resp.encode("utf-8"))
 
 
-            elif data["operacion"] == "consultar_reversiones":
-                resp = self.db.consultar_reversiones((data["id_cliente"], data["id_prestamo"]))
-                client_socket.send(resp.encode("utf-8"))
+                elif data["operacion"] == "consultar_pagos":
+                    resp = self.db.consultar_pagos((data["id_cliente"], data["id_prestamo"]))
+                    client_socket.send(resp.encode("utf-8"))
 
 
-            elif data["operacion"] == "registrar_pago":
-                resp = self.db.registrar_pago((data["id_cliente"], data["id_prestamo"]))
-                client_socket.send(resp.encode("utf-8"))
+                elif data["operacion"] == "consultar_reversiones":
+                    resp = self.db.consultar_reversiones((data["id_cliente"], data["id_prestamo"]))
+                    client_socket.send(resp.encode("utf-8"))
 
 
-            elif data["operacion"] == "chat":
-                pass
+                elif data["operacion"] == "registrar_pago":
+                    resp = self.db.registrar_pago((data["id_cliente"], data["id_prestamo"]))
+                    client_socket.send(resp.encode("utf-8"))
+
+
+                elif data["operacion"] == "chat":
+                    pass
+                
+        except BaseException as errorType:
+            self.utils.error_handler(errorType)
 
 
     
