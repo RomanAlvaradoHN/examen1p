@@ -47,7 +47,7 @@ class ServerSocket:
         while True:
             new_socket = self.server_socket.accept()
 
-            print("New client connection")
+            print(f"New client connection from {new_socket[1][0]}")
 
             #Hilo para comunicacion de cada sockets cliente---------------
             client_operations_thread = threading.Thread(target = self.__operation_controller, args=[new_socket])
@@ -56,7 +56,7 @@ class ServerSocket:
 
     #ORQUESTADOR DE OPERACIONES ------------------------------------------
     def __operation_controller(self, new_socket):
-        try:
+        #try:
             client_socket, client_address = new_socket
 
             while True:
@@ -66,8 +66,10 @@ class ServerSocket:
                 if data["operacion"] == "login":
                     resp = self.db.validar_credenciales((data["username"], data["password"]))
                     
-                    if resp["authenticated"]: print("login refused"  + str(client_address[0]))
-                    else: print("login successful"  + str(client_address[0]))
+                    if resp["authenticated"]:
+                        print(f"login from {client_address[0]} refused")
+                    else:
+                        print(f"login from {client_address[0]} successful")
 
                     client_socket.send(resp.encode("utf-8"))
 
@@ -95,8 +97,8 @@ class ServerSocket:
                 elif data["operacion"] == "chat":
                     pass
                 
-        except BaseException as errorType:
-            self.utils.error_handler(errorType)
+        #except BaseException as errorType:
+        #    self.utils.error_handler(errorType)
 
 
     
