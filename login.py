@@ -66,17 +66,16 @@ class Ventana():
             if not self.sockt.server_response: pass
             else:
                 resp = json.loads(self.sockt.server_response)
-                print(resp)
 
-                if "authenticated" in resp:
-                    if resp["authenticated"] == True:
-                        self.plogin.destroy()
-                        pmenu = Menu(self.sockt, resp)
-                        pmenu.mostrar_ventana()
+                if "authenticated" in resp and resp["authenticated"] == True:
+                    self.plogin.destroy()
+                    pmenu = Menu(self.sockt, resp)
+                    pmenu.mostrar_ventana()
 
-                    else:
-                        messagebox.showwarning("Login:", "Credenciales no validas")
-                        break
+                else:
+                    messagebox.showwarning("Login:", "Credenciales no validas")
+                    self.sockt.server_response = None
+                    break
 
 
 
@@ -129,7 +128,6 @@ class ClientSocket():
     ############################################################################
     def receive(self):
         while True:
-            #respuesta se recibe como un JSON
             self.server_response = self.sockt.recv(1024).decode("utf-8")
 
 
