@@ -56,7 +56,7 @@ class ServerSocket:
 
     #ORQUESTADOR DE OPERACIONES ------------------------------------------
     def __operation_controller(self, new_socket):
-        #try:
+        try:
             client_socket, client_address = new_socket
 
             while True:
@@ -67,9 +67,9 @@ class ServerSocket:
                     resp = self.db.validar_credenciales((data["username"], data["password"]))
                     
                     if resp["authenticated"]:
-                        print(f"login from {client_address[0]} refused")
-                    else:
                         print(f"login from {client_address[0]} successful")
+                    else:
+                        print(f"login from {client_address[0]} refused")
 
                     client_socket.send(json.dumps(resp).encode("utf-8"))
 
@@ -97,8 +97,8 @@ class ServerSocket:
                 elif data["operacion"] == "chat":
                     pass
                 
-        #except BaseException as errorType:
-        #    self.utils.error_handler(errorType)
+        except BaseException as errorType:
+            self.utils.error_handler(errorType)
 
 
     
