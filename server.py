@@ -62,7 +62,7 @@ class ServerSocket:
             while True:
                 data = json.loads(client_socket.recv(1024).decode("utf-8"))
 
-                #OPERACIONES -----------------------------------------------------
+                #LOGIN  --------------------------------------------------
                 if data["operacion"] == "login":
                     resp = self.db.validar_credenciales((data["username"], data["password"]))
                     
@@ -70,30 +70,36 @@ class ServerSocket:
                         print(f"login from {client_address[0]} successful")
                     else:
                         print(f"login from {client_address[0]} refused")
-
+                    
                     client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
+
+                #CONSULTA DE PRESTAMOS -----------------------------------
                 elif data["operacion"] == "consultar_prestamos":
-                    resp = self.db.consultar_prestamos((data["id_cliente"]))
+                    resp = self.db.consultar_prestamos(data["id_cliente"])
                     client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
+                #CONSULTA DE PAGOS ---------------------------------------
                 elif data["operacion"] == "consultar_pagos":
                     resp = self.db.consultar_pagos((data["id_cliente"], data["id_prestamo"]))
                     client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
+                #CONSUTAR REVERSIONES ------------------------------------
                 elif data["operacion"] == "consultar_reversiones":
                     resp = self.db.consultar_reversiones((data["id_cliente"], data["id_prestamo"]))
                     client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
+                #REGISTRAR PAGOS -----------------------------------------
                 elif data["operacion"] == "registrar_pago":
                     resp = self.db.registrar_pago((data["id_cliente"], data["id_prestamo"]))
                     client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
+                #CONTROL DE CHAT -----------------------------------------
                 elif data["operacion"] == "chat":
                     pass
                 
@@ -180,7 +186,6 @@ class ServerSocket:
         for client in self.clients:
             if client["socket"] != sender_socket:
                 client["socket"].send(message.encode("utf-8"))
-
 
 
 
