@@ -80,7 +80,7 @@ class ServerSocket:
 
                 #CONSULTA DE PRESTAMOS -----------------------------------
                 elif data["operacion"] == "consultar_prestamos":
-                    resp = self.db.consultar_prestamos(data["id_cliente"])
+                    resp = self.db.consultar_prestamos((data["id_cliente"],))
                     client_socket.send(json.dumps(resp).encode("utf-8"))
 
 
@@ -332,7 +332,7 @@ class DatabaseConexion():
 if __name__ == "__main__":
 
     parametros = {
-        "server_ip": '172.31.30.203',
+        "server_ip": '172.31.20.154',
         "server_port": 9999,
         "database_conexion": DatabaseConexion()
     }

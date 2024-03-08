@@ -56,6 +56,7 @@ class Menu():
     def abrir_prestamos(self):
         self.pmenu.withdraw()
         pprestamo = Prestamo(self.sockt, self.usuario)
+        pprestamo.mostrar_ventana()
 
 
 

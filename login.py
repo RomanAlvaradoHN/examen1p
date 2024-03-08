@@ -53,6 +53,8 @@ class Ventana():
 
     #ACCION DE BOTON LOGIN -----------------------------------------------
     def validar_credenciales(self):
+        self.sockt.server_response = None
+
         self.sockt.send(
             json.dumps({
                 "operacion": "login",
@@ -66,14 +68,13 @@ class Ventana():
             else:
                 resp = json.loads(self.sockt.server_response)
 
-                if "authenticated" in resp and resp["authenticated"] == True:
+                if resp["authenticated"] == True:
                     self.plogin.destroy()
                     pmenu = Menu(self.sockt, resp)
                     pmenu.mostrar_ventana()
 
                 else:
                     messagebox.showwarning("Login:", "Credenciales no validas")
-                    self.sockt.server_response = None
                     break
 
 
@@ -93,7 +94,14 @@ class ClientSocket():
         server_ip = params["server_ip"]
         server_port = params["server_port"]
         self.utils = Utilities()
-        self.server_response = None
+        
+        #self.server_response = None
+        self.server_response = json.dumps({
+            "authenticated": True,
+            "id_cliente": 1,
+            "nombre": "Roman"
+        })
+
 
         try:
             self.utils.clear_console()
@@ -131,7 +139,7 @@ class ClientSocket():
 ############################################################################
 parametros = {
     "sockt": ClientSocket({
-        "server_ip": "ec2-3-139-91-226.us-east-2.compute.amazonaws.com",
+        "server_ip": "ec2-3-145-209-147.us-east-2.compute.amazonaws.com",
         "server_port": 9999
     })
 }

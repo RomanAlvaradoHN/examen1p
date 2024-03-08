@@ -11,33 +11,49 @@ class Prestamo():
         self.usuario = usuario
 
 
-    def mostrar_ventana():
+    def mostrar_ventana(self):
         self.pprestamo = tk.Tk()
         self.pprestamo.title("Tabla de Préstamos")
 
-        tabla = ttk.Treeview(self.pprestamo)
-        tabla["columns"] = ("Id", "IdCliente", "MontoPrestamo", "Cuotas", "MontoCuota", "Estado")
-        tabla.heading("#0", text="ID Préstamo")
-        tabla.heading("Id", text="ID Préstamo")
-        tabla.heading("IdCliente", text="ID Cliente")
-        tabla.heading("MontoPrestamo", text="Monto Préstamo")
-        tabla.heading("Cuotas", text="Cuotas")
-        tabla.heading("MontoCuota", text="Monto Cuota")
-        tabla.heading("Estado", text="Estado")
+        columnas = ('id_prestamo', 'monto_prestamo', 'cuotas', 'monto_cuota', 'saldo_pendiente', 'estado')
+        displaycolumnas = ('id_prestamo', 'monto_prestamo', 'cuotas', 'monto_cuota', 'saldo_pendiente', 'estado')
+        self.tabla = ttk.Treeview(self.pprestamo, displaycolumns=displaycolumnas, columns=columnas)
+
 
         #for prestamo in prestamos:
         #    tabla.insert("", "end", text=prestamo["id"], values=(prestamo["id"], prestamo["IdCliente"], prestamo["MontoPrestamo"], prestamo["cuotas"], prestamo["montocuota"], prestamo["Estado"]))
 
-        tabla.pack()
-
+        self.tabla.pack()
+        
+        self.get_prestamos_cliente()
         self.pprestamo.mainloop()
 
 
 
-    def get_prestamos_cliente():
+    def get_prestamos_cliente(self):
+        self.sockt.server_response = None
+
         self.sockt.send(
             json.dumps({
                 "operacion": "consultar_prestamos",
-                "id_cliente": usuario["id_cliente"]
+                "id_cliente": self.usuario["id_cliente"]
             })
         )
+
+        while True:
+            if not self.sockt.server_response: pass
+            else:
+                prestamos = json.loads(self.sockt.server_response)
+                #print(str(type(resp)), f"\n {resp}")
+
+                for prestamo in prestamos:
+                    self.tabla.insert("", "end", values=(
+                        prestamo["id_prestamo"],
+                        prestamo["monto_prestamo"],
+                        prestamo["cuotas"],
+                        prestamo["monto_cuota"],
+                        prestamo["saldo_pendiente"],
+                        prestamo["estado"]))
+
+                break
+
